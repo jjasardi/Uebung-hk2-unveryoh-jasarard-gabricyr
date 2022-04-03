@@ -13,5 +13,10 @@ A clear and concise description of what the bug is.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Approach**
-Approach to solve the issue
+**Approaches**
+Approaches to solve the issue
+-1st approach
+-2nd approach...
+
+**Chosen Approach**
+Why this approach?
