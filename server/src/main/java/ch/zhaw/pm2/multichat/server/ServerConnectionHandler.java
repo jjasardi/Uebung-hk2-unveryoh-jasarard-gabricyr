@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.zhaw.pm2.multichat.server.ServerConnectionHandler.State.*;
 
-public class ServerConnectionHandler {
+public class ServerConnectionHandler implements Runnable{
     private static final AtomicInteger connectionCounter = new AtomicInteger(0);
     private final int connectionId = connectionCounter.incrementAndGet();
     private final NetworkHandler.NetworkConnection<String> connection;
@@ -37,7 +37,7 @@ public class ServerConnectionHandler {
         NEW, CONNECTED, DISCONNECTED;
     }
 
-    public ServerConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
+    public ServerConnectionHandler (NetworkHandler.NetworkConnection<String> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
@@ -54,7 +54,7 @@ public class ServerConnectionHandler {
         try {
             System.out.println("Start receiving data...");
             while (connection.isAvailable()) {
-                String data = connection.receive();
+                String data = connection.receive(); //hier ist das Problem !!!
                 processData(data);
             }
             System.out.println("Stopped recieving data");
@@ -180,4 +180,11 @@ public class ServerConnectionHandler {
             }
         }
     }
+
+
+        @Override
+        public void run() {
+            startReceiving();
+        }
+
 }
