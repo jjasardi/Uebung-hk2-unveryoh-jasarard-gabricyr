@@ -1,6 +1,7 @@
 package ch.zhaw.pm2.multichat.client;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
+import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 import java.io.EOFException;
@@ -10,22 +11,10 @@ import java.util.Scanner;
 
 import static ch.zhaw.pm2.multichat.client.ClientConnectionHandler.State.*;
 
-public class ClientConnectionHandler implements Runnable {
-    private final NetworkHandler.NetworkConnection<String> connection;
+public class ClientConnectionHandler extends ConnectionHandler implements Runnable {
     private final ChatWindowController controller;
-
-    // Data types used for the Chat Protocol
-    private static final String DATA_TYPE_CONNECT = "CONNECT";
-    private static final String DATA_TYPE_CONFIRM = "CONFIRM";
-    private static final String DATA_TYPE_DISCONNECT = "DISCONNECT";
-    private static final String DATA_TYPE_MESSAGE = "MESSAGE";
-    private static final String DATA_TYPE_ERROR = "ERROR";
-
-    public static final String USER_NONE = "";
-    public static final String USER_ALL = "*";
-
-    private String userName = USER_NONE;
     private State state = NEW;
+    private String userName = getUserName();
 
     enum State {
         NEW, CONFIRM_CONNECT, CONNECTED, CONFIRM_DISCONNECT, DISCONNECTED;
@@ -34,8 +23,7 @@ public class ClientConnectionHandler implements Runnable {
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
                                    String userName,
                                    ChatWindowController controller)  {
-        this.connection = connection;
-        this.userName = (userName == null || userName.isBlank())? USER_NONE : userName;
+        super(connection, userName);
         this.controller = controller;
     }
 
@@ -56,8 +44,8 @@ public class ClientConnectionHandler implements Runnable {
         System.out.println("Starting Connection Handler");
         try {
             System.out.println("Start receiving data...");
-            while (connection.isAvailable()) {
-                String data = connection.receive();
+            while (getConnection().isAvailable()) {
+                String data = getConnection().receive();
                 processData(data);
             }
             System.out.println("Stopped recieving data");
@@ -81,7 +69,7 @@ public class ClientConnectionHandler implements Runnable {
         System.out.println("Closing Connection Handler to Server");
         try {
             System.out.println("Stop receiving data...");
-            connection.close();
+            getConnection().close();
             System.out.println("Stopped receiving data.");
         } catch (IOException e) {
             System.err.println("Failed to close connection." + e.getMessage());
@@ -121,9 +109,9 @@ public class ClientConnectionHandler implements Runnable {
             } else if (type.equals(DATA_TYPE_CONFIRM)) {
                 if (state == CONFIRM_CONNECT) {
                     this.userName = reciever;
-                    controller.setUserName(userName);
-                    controller.setServerPort(connection.getRemotePort());
-                    controller.setServerAddress(connection.getRemoteHost());
+                    controller.setUserName(getUserName());
+                    controller.setServerPort(getConnection().getRemotePort());
+                    controller.setServerAddress(getConnection().getRemoteHost());
                     controller.addInfo(payload);
                     System.out.println("CONFIRM: " + payload);
                     this.setState(CONNECTED);
@@ -158,27 +146,6 @@ public class ClientConnectionHandler implements Runnable {
         } catch (ChatProtocolException e) {
             System.err.println("Error while processing data: " + e.getMessage());
             sendData(USER_NONE, userName, DATA_TYPE_ERROR, e.getMessage());
-        }
-    }
-
-    public void sendData(String sender, String receiver, String type, String payload) {
-        if (connection.isAvailable()) {
-            new StringBuilder();
-            String data = new StringBuilder()
-                .append(sender+"\n")
-                .append(receiver+"\n")
-                .append(type+"\n")
-                .append(payload+"\n")
-                .toString();
-            try {
-                connection.send(data);
-            } catch (SocketException e) {
-                System.err.println("Connection closed: " + e.getMessage());
-            } catch (EOFException e) {
-                System.out.println("Connection terminated by remote");
-            } catch(IOException e) {
-                System.err.println("Communication error: " + e.getMessage());
-            }
         }
     }
 

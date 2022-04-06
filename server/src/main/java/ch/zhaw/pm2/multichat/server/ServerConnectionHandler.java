@@ -1,36 +1,23 @@
 package ch.zhaw.pm2.multichat.server;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
+import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.zhaw.pm2.multichat.server.ServerConnectionHandler.State.*;
 
-public class ServerConnectionHandler {
-    private static final AtomicInteger connectionCounter = new AtomicInteger(0);
-    private final int connectionId = connectionCounter.incrementAndGet();
+public class ServerConnectionHandler extends ConnectionHandler {
     private final NetworkHandler.NetworkConnection<String> connection;
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
-    // Data types used for the Chat Protocol
-    private static final String DATA_TYPE_CONNECT = "CONNECT";
-    private static final String DATA_TYPE_CONFIRM = "CONFIRM";
-    private static final String DATA_TYPE_DISCONNECT = "DISCONNECT";
-    private static final String DATA_TYPE_MESSAGE = "MESSAGE";
-    private static final String DATA_TYPE_ERROR = "ERROR";
-
-    private static final String USER_NONE = "";
-    private static final String USER_ALL = "*";
-
-    private String userName = "Anonymous-"+connectionId;
+    private String userName = getUserName();
     private State state = NEW;
 
     enum State {
@@ -39,6 +26,7 @@ public class ServerConnectionHandler {
 
     public ServerConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
                                    Map<String,ServerConnectionHandler> registry) {
+        super(connection);
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
         this.connection = connection;
@@ -157,27 +145,6 @@ public class ServerConnectionHandler {
         } catch(ChatProtocolException e) {
             System.out.println("Error while processing data" + e.getMessage());
             sendData(USER_NONE, userName, DATA_TYPE_ERROR, e.getMessage());
-        }
-    }
-
-    public void sendData(String sender, String receiver, String type, String payload) {
-        if (connection.isAvailable()) {
-            new StringBuilder();
-            String data = new StringBuilder()
-                .append(sender+"\n")
-                .append(receiver+"\n")
-                .append(type+"\n")
-                .append(payload+"\n")
-                .toString();
-            try {
-                connection.send(data);
-            } catch (SocketException e) {
-                System.out.println("Connection closed: " + e.getMessage());
-            } catch (EOFException e) {
-                System.out.println("Connection terminated by remote");
-            } catch(IOException e) {
-                System.out.println("Communication error: " + e.getMessage());
-            }
         }
     }
 }
