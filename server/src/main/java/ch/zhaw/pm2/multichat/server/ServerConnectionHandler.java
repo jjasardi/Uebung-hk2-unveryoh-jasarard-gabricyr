@@ -11,18 +11,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
-import static ch.zhaw.pm2.multichat.server.ServerConnectionHandler.State.*;
-
 public class ServerConnectionHandler extends ConnectionHandler {
     private final NetworkHandler.NetworkConnection<String> connection;
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
     private String userName = getUserName();
-    private State state = NEW;
-
-    enum State {
-        NEW, CONNECTED, DISCONNECTED;
-    }
+    private State state = State.NEW;
 
     public ServerConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
                                    Map<String,ServerConnectionHandler> registry) {
@@ -31,10 +25,6 @@ public class ServerConnectionHandler extends ConnectionHandler {
         Objects.requireNonNull(registry, "Registry must not be null");
         this.connection = connection;
         this.connectionRegistry = registry;
-    }
-
-    public String getUserName() {
-        return this.userName;
     }
 
     public void startReceiving() {
@@ -103,27 +93,27 @@ public class ServerConnectionHandler extends ConnectionHandler {
 
             // dispatch operation based on type parameter
             if (type.equals(DATA_TYPE_CONNECT)) {
-                if (this.state != NEW) throw new ChatProtocolException("Illegal state for connect request: " + state);
+                if (this.state != State.NEW) throw new ChatProtocolException("Illegal state for connect request: " + state);
                 if (sender == null || sender.isBlank()) sender = this.userName;
                 if (connectionRegistry.containsKey(sender))
                     throw new ChatProtocolException("User name already taken: " + sender);
                 this.userName = sender;
                 connectionRegistry.put(userName, this);
                 sendData(USER_NONE, userName, DATA_TYPE_CONFIRM, "Registration successfull for " + userName);
-                this.state = CONNECTED;
+                this.state = State.CONNECTED;
             } else if (type.equals(DATA_TYPE_CONFIRM)) {
                 System.out.println("Not expecting to receive a CONFIRM request from client");
             } else if (type.equals(DATA_TYPE_DISCONNECT)) {
-                if (state == DISCONNECTED)
+                if (state == State.DISCONNECTED)
                     throw new ChatProtocolException("Illegal state for disconnect request: " + state);
-                if (state == CONNECTED) {
+                if (state == State.CONNECTED) {
                     connectionRegistry.remove(this.userName);
                 }
                 sendData(USER_NONE, userName, DATA_TYPE_CONFIRM, "Confirm disconnect of " + userName);
-                this.state = DISCONNECTED;
+                this.state = State.DISCONNECTED;
                 this.stopReceiving();
             } else if (type.equals(DATA_TYPE_MESSAGE)) {
-                if (state != CONNECTED) throw new ChatProtocolException("Illegal state for message request: " + state);
+                if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message request: " + state);
                 if (USER_ALL.equals(reciever)) {
                     for (ServerConnectionHandler handler : connectionRegistry.values()) {
                         handler.sendData(sender, reciever, type, payload);

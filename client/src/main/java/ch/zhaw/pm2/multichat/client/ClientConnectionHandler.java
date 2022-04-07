@@ -9,16 +9,10 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.Scanner;
 
-import static ch.zhaw.pm2.multichat.client.ClientConnectionHandler.State.*;
-
 public class ClientConnectionHandler extends ConnectionHandler implements Runnable {
     private final ChatWindowController controller;
-    private State state = NEW;
+    private State state = State.NEW;
     private String userName = getUserName();
-
-    enum State {
-        NEW, CONFIRM_CONNECT, CONNECTED, CONFIRM_DISCONNECT, DISCONNECTED;
-    }
 
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
                                    String userName,
@@ -51,11 +45,11 @@ public class ClientConnectionHandler extends ConnectionHandler implements Runnab
             System.out.println("Stopped recieving data");
         } catch (SocketException e) {
             System.out.println("Connection terminated locally");
-            this.setState(DISCONNECTED);
+            this.setState(State.DISCONNECTED);
             System.err.println("Unregistered because connection terminated" + e.getMessage());
         } catch (EOFException e) {
             System.out.println("Connection terminated by remote");
-            this.setState(DISCONNECTED);
+            this.setState(State.DISCONNECTED);
             System.err.println("Unregistered because connection terminated" + e.getMessage());
         } catch(IOException e) {
             System.err.println("Communication error" + e);
@@ -107,31 +101,31 @@ public class ClientConnectionHandler extends ConnectionHandler implements Runnab
             if (type.equals(DATA_TYPE_CONNECT)) {
                 System.err.println("Illegal connect request from server");
             } else if (type.equals(DATA_TYPE_CONFIRM)) {
-                if (state == CONFIRM_CONNECT) {
+                if (state == State.CONFIRM_CONNECT) {
                     this.userName = reciever;
                     controller.setUserName(getUserName());
                     controller.setServerPort(getConnection().getRemotePort());
                     controller.setServerAddress(getConnection().getRemoteHost());
                     controller.addInfo(payload);
                     System.out.println("CONFIRM: " + payload);
-                    this.setState(CONNECTED);
-                } else if (state == CONFIRM_DISCONNECT) {
+                    this.setState(State.CONNECTED);
+                } else if (state == State.CONFIRM_DISCONNECT) {
                     controller.addInfo(payload);
                     System.out.println("CONFIRM: " + payload);
-                    this.setState(DISCONNECTED);
+                    this.setState(State.DISCONNECTED);
                 } else {
                     System.err.println("Got unexpected confirm message: " + payload);
                 }
             } else if (type.equals(DATA_TYPE_DISCONNECT)) {
-                if (state == DISCONNECTED) {
+                if (state == State.DISCONNECTED) {
                     System.out.println("DISCONNECT: Already in disconnected: " + payload);
                     return;
                 }
                 controller.addInfo(payload);
                 System.out.println("DISCONNECT: " + payload);
-                this.setState(DISCONNECTED);
+                this.setState(State.DISCONNECTED);
             } else if (type.equals(DATA_TYPE_MESSAGE)) {
-                if (state != CONNECTED) {
+                if (state != State.CONNECTED) {
                     System.out.println("MESSAGE: Illegal state " + state + " for message: " + payload);
                     return;
                 }
@@ -150,19 +144,19 @@ public class ClientConnectionHandler extends ConnectionHandler implements Runnab
     }
 
     public void connect() throws ChatProtocolException {
-        if (state != NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
+        if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
         this.sendData(userName, USER_NONE, DATA_TYPE_CONNECT,null);
-        this.setState(CONFIRM_CONNECT);
+        this.setState(State.CONFIRM_CONNECT);
     }
 
     public void disconnect() throws ChatProtocolException {
-        if (state != NEW && state != CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
+        if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
         this.sendData(userName, USER_NONE, DATA_TYPE_DISCONNECT,null);
-        this.setState(CONFIRM_DISCONNECT);
+        this.setState(State.CONFIRM_DISCONNECT);
     }
 
     public void message(String receiver, String message) throws ChatProtocolException {
-        if (state != CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
+        if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
         this.sendData(userName, receiver, DATA_TYPE_MESSAGE,message);
     }
 
