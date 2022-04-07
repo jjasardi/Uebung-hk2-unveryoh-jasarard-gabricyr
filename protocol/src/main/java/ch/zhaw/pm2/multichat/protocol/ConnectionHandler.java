@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
-public class ConnectionHandler {
+public abstract class ConnectionHandler {
     private final NetworkHandler.NetworkConnection<String> connection;
     private static final AtomicInteger connectionCounter = new AtomicInteger(0);
     private final int connectionId = connectionCounter.incrementAndGet();
@@ -24,6 +24,10 @@ public class ConnectionHandler {
     public static final String USER_ALL = "*";
 
     private String userName = USER_NONE;
+
+    public enum State {
+        NEW, CONFIRM_CONNECT, CONNECTED, CONFIRM_DISCONNECT, DISCONNECTED;
+    }
 
     /**
      * @param connection
