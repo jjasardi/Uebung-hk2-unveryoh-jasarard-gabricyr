@@ -1,6 +1,5 @@
 package ch.zhaw.pm2.multichat.client;
 
-import ch.zhaw.pm2.multichat.client.ClientConnectionHandler.State;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
@@ -16,8 +15,6 @@ import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static ch.zhaw.pm2.multichat.client.ClientConnectionHandler.State.*;
 
 public class ChatWindowController {
     private final Pattern messagePattern = Pattern.compile( "^(?:@(\\w*))?\\s*(.*)$" );
@@ -41,17 +38,17 @@ public class ChatWindowController {
     public void initialize() {
         serverAddressField.setText(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
         serverPortField.setText(String.valueOf(NetworkHandler.DEFAULT_PORT));
-        stateChanged(NEW);
+        stateChanged(ConnectionHandler.State.NEW);
         messages = new ClientMessageList(this);
     }
 
     private void applicationClose() {
-        connectionHandler.setState(DISCONNECTED);
+        connectionHandler.setState(ConnectionHandler.State.DISCONNECTED);
     }
 
     @FXML
     private void toggleConnection () {
-        if (connectionHandler == null || connectionHandler.getState() != CONNECTED) {
+        if (connectionHandler == null || connectionHandler.getState() != ConnectionHandler.State.CONNECTED) {
             connect();
         } else {
             disconnect();
@@ -129,15 +126,15 @@ public class ChatWindowController {
         }
     }
 
-    public void stateChanged(State newState) {
+    public void stateChanged(ConnectionHandler.State newState) {
         // update UI (need to be run in UI thread: see Platform.runLater())
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                connectButton.setText((newState == CONNECTED || newState == CONFIRM_DISCONNECT) ? "Disconnect" : "Connect");
+                connectButton.setText((newState == ConnectionHandler.State.CONNECTED || newState == ConnectionHandler.State.CONFIRM_DISCONNECT) ? "Disconnect" : "Connect");
             }
         });
-        if (newState == DISCONNECTED) {
+        if (newState == ConnectionHandler.State.DISCONNECTED) {
             terminateConnectionHandler();
         }
     }
