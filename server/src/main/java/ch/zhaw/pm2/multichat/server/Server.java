@@ -66,13 +66,15 @@ public class Server {
         try {
             while (true) {
                  NetworkHandler.NetworkConnection<String> connection = networkServer.waitForConnection();
-                 Thread serverThread = new Thread(new ServerConnectionHandler(connection, connections));
-                 serverThread.start();
+
+                 Runnable connectionHandler = new ServerConnectionHandler(connection, connections);
+                 Thread connectionHandlerThread = new Thread(connectionHandler);
+                 connectionHandlerThread.start();
 
                  // TODO: This invwoke makes that the counter for the cleints rises +1 to what it schould be
-                 ServerConnectionHandler connectionHandler = new ServerConnectionHandler(connection, connections);
+                 //ServerConnectionHandler connectionHandlerObsolete = new ServerConnectionHandler(connection, connections);
                  System.out.println(String.format("Connected new Client %s with IP:Port <%s:%d>",
-                     connectionHandler.getUserName(),
+                     ((ServerConnectionHandler) connectionHandler).getUserName(),
                      connection.getRemoteHost(),
                      connection.getRemotePort()
                  ));
