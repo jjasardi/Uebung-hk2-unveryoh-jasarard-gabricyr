@@ -29,13 +29,24 @@ public class ClientMessageListDecorator implements IsObservable {
         listener.remove(observer);
     }
 
+    public List<MessageType> getTypeList() {
+		return clientMessageList.getTypeList();
+	}
+
+	public List<String> getSenderList() {
+		return clientMessageList.getSenderList();
+	}
+
+	public List<String> getReceiverList() {
+		return clientMessageList.getReceiverList();
+	}
+
+	public List<String> getMessageList() {
+		return clientMessageList.getMessageList();
+	}
+
     public void addMessage(MessageType type, String sender, String receiver, String message) {
         clientMessageList.addMessage(type, sender, receiver, message);
-        informListener();
-    }
-
-    public void writeFilteredMessages(String filter) { 
-        clientMessageList.writeFilteredMessages(filter);
         informListener();
     }
     

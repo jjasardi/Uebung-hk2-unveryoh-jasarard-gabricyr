@@ -13,13 +13,15 @@ import javafx.scene.layout.Pane;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatWindowController {
     private final Pattern messagePattern = Pattern.compile( "^(?:@(\\w*))?\\s*(.*)$" );
     private ClientConnectionHandler connectionHandler;
-    private ClientMessageList messages;
+    private ClientMessageListDecorator messagesDecorator;
 
     private final WindowCloseHandler windowCloseHandler = new WindowCloseHandler();
 
@@ -39,7 +41,17 @@ public class ChatWindowController {
         serverAddressField.setText(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
         serverPortField.setText(String.valueOf(NetworkHandler.DEFAULT_PORT));
         stateChanged(ConnectionHandler.State.NEW);
-        messages = new ClientMessageList(this);
+        setClientMessageListDecorator();
+    }
+
+    private void setClientMessageListDecorator() {
+        messagesDecorator = new ClientMessageListDecorator(new ClientMessageList());
+        messagesDecorator.addListener(new IsObserver() {
+            @Override
+            public void update() {
+                redrawMessageList();
+            }
+        });
     }
 
     private void applicationClose() {
@@ -57,7 +69,7 @@ public class ChatWindowController {
 
     private void connect() {
         try {
-            messages = new ClientMessageList(this); // clear message list
+            setClientMessageListDecorator();
             startConnectionHandler();
             connectionHandler.connect();
         } catch(ChatProtocolException | IOException e) {
@@ -167,18 +179,15 @@ public class ChatWindowController {
     }
 
     public void addMessage(String sender, String receiver, String message) {
-        messages.addMessage(ClientMessageList.MessageType.MESSAGE, sender, receiver, message);
-        this.redrawMessageList();
+        messagesDecorator.addMessage(ClientMessageList.MessageType.MESSAGE, sender, receiver, message);
     }
 
     public void addInfo(String message) {
-        messages.addMessage(ClientMessageList.MessageType.INFO, null, null, message);
-        this.redrawMessageList();
+        messagesDecorator.addMessage(ClientMessageList.MessageType.INFO, null, null, message);
     }
 
     public void addError(String message) {
-        messages.addMessage(ClientMessageList.MessageType.ERROR, null, null, message);
-        this.redrawMessageList();
+        messagesDecorator.addMessage(ClientMessageList.MessageType.ERROR, null, null, message);
     }
 
     public void clearMessageArea() {
@@ -187,20 +196,46 @@ public class ChatWindowController {
 
 
     private void redrawMessageList() {
-        Platform.runLater(() -> messages.writeFilteredMessages(filterValue.getText().strip()));
+        Platform.runLater(() -> writeFilteredMessages(filterValue.getText().strip()));
     }
 
-    public void writeError(String message) {
+    private void writeError(String message) {
         this.messageArea.appendText(String.format("[ERROR] %s\n", message));
     }
 
-    public void writeInfo(String message) {
+    private void writeInfo(String message) {
         this.messageArea.appendText(String.format("[INFO] %s\n", message));
     }
 
-    public void writeMessage(String sender, String reciever, String message) {
+    private void writeMessage(String sender, String reciever, String message) {
         this.messageArea.appendText(String.format("[%s -> %s] %s\n", sender, reciever, message));
     }
+
+    private void writeFilteredMessages(String filter) {
+		boolean showAll = filter == null || filter.isBlank();
+        List<String> senderList = messagesDecorator.getSenderList();
+        List<String> receiverList = messagesDecorator.getReceiverList();
+        List<String> messageList = messagesDecorator.getMessageList();
+        List<ClientMessageList.MessageType> typeList = messagesDecorator.getTypeList();
+		clearMessageArea();
+		for(int i=0; i<messagesDecorator.getSenderList().size(); i++) {
+		    String sender = Objects.requireNonNullElse(senderList.get(i),"");
+		    String receiver = Objects.requireNonNullElse(receiverList.get(i),"");
+		    String message = Objects.requireNonNull(messageList.get(i), "");
+			if(showAll ||
+					sender.contains(filter) ||
+					receiver.contains(filter) ||
+					message.contains(filter))
+			{
+			    switch (typeList.get(i)) {
+                    case MESSAGE: writeMessage(senderList.get(i), receiverList.get(i), messageList.get(i)); break;
+                    case ERROR: writeError(messageList.get(i)); break;
+                    case INFO: writeInfo(messageList.get(i)); break;
+                    default: writeError("Unexpected message type: " + typeList.get(i));
+                }
+			}
+		}
+	}
 
 
     class WindowCloseHandler implements EventHandler<WindowEvent> {
