@@ -3,7 +3,7 @@
 *.ipr
 *.ids
 *.iws
-#.idea/
+.idea/
 
 # Eclipse files
 .project
