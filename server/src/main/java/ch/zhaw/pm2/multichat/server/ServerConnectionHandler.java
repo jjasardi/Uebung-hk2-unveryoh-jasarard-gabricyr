@@ -11,14 +11,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class ServerConnectionHandler extends ConnectionHandler {
+public class ServerConnectionHandler extends ConnectionHandler implements Runnable {
     private final NetworkHandler.NetworkConnection<String> connection;
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
     private String userName = getUserName();
     private State state = State.NEW;
 
-    public ServerConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
+    public ServerConnectionHandler (NetworkHandler.NetworkConnection<String> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         super(connection);
         Objects.requireNonNull(connection, "Connection must not be null");
@@ -137,4 +137,9 @@ public class ServerConnectionHandler extends ConnectionHandler {
             sendData(USER_NONE, userName, DATA_TYPE_ERROR, e.getMessage());
         }
     }
+
+        @Override
+        public void run() {
+            startReceiving();
+        }
 }
