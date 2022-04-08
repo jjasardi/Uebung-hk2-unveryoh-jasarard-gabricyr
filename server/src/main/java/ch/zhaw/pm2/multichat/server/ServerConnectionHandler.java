@@ -1,52 +1,30 @@
 package ch.zhaw.pm2.multichat.server;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
+import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static ch.zhaw.pm2.multichat.server.ServerConnectionHandler.State.*;
-
-public class ServerConnectionHandler {
-    private static final AtomicInteger connectionCounter = new AtomicInteger(0);
-    private final int connectionId = connectionCounter.incrementAndGet();
+public class ServerConnectionHandler extends ConnectionHandler implements Runnable {
     private final NetworkHandler.NetworkConnection<String> connection;
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
-    // Data types used for the Chat Protocol
-    private static final String DATA_TYPE_CONNECT = "CONNECT";
-    private static final String DATA_TYPE_CONFIRM = "CONFIRM";
-    private static final String DATA_TYPE_DISCONNECT = "DISCONNECT";
-    private static final String DATA_TYPE_MESSAGE = "MESSAGE";
-    private static final String DATA_TYPE_ERROR = "ERROR";
+    private String userName = getUserName();
+    private State state = State.NEW;
 
-    private static final String USER_NONE = "";
-    private static final String USER_ALL = "*";
-
-    private String userName = "Anonymous-"+connectionId;
-    private State state = NEW;
-
-    enum State {
-        NEW, CONNECTED, DISCONNECTED;
-    }
-
-    public ServerConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
+    public ServerConnectionHandler (NetworkHandler.NetworkConnection<String> connection,
                                    Map<String,ServerConnectionHandler> registry) {
+        super(connection);
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
         this.connection = connection;
         this.connectionRegistry = registry;
-    }
-
-    public String getUserName() {
-        return this.userName;
     }
 
     public void startReceiving() {
@@ -115,27 +93,27 @@ public class ServerConnectionHandler {
 
             // dispatch operation based on type parameter
             if (type.equals(DATA_TYPE_CONNECT)) {
-                if (this.state != NEW) throw new ChatProtocolException("Illegal state for connect request: " + state);
+                if (this.state != State.NEW) throw new ChatProtocolException("Illegal state for connect request: " + state);
                 if (sender == null || sender.isBlank()) sender = this.userName;
                 if (connectionRegistry.containsKey(sender))
                     throw new ChatProtocolException("User name already taken: " + sender);
                 this.userName = sender;
                 connectionRegistry.put(userName, this);
                 sendData(USER_NONE, userName, DATA_TYPE_CONFIRM, "Registration successfull for " + userName);
-                this.state = CONNECTED;
+                this.state = State.CONNECTED;
             } else if (type.equals(DATA_TYPE_CONFIRM)) {
                 System.out.println("Not expecting to receive a CONFIRM request from client");
             } else if (type.equals(DATA_TYPE_DISCONNECT)) {
-                if (state == DISCONNECTED)
+                if (state == State.DISCONNECTED)
                     throw new ChatProtocolException("Illegal state for disconnect request: " + state);
-                if (state == CONNECTED) {
+                if (state == State.CONNECTED) {
                     connectionRegistry.remove(this.userName);
                 }
                 sendData(USER_NONE, userName, DATA_TYPE_CONFIRM, "Confirm disconnect of " + userName);
-                this.state = DISCONNECTED;
+                this.state = State.DISCONNECTED;
                 this.stopReceiving();
             } else if (type.equals(DATA_TYPE_MESSAGE)) {
-                if (state != CONNECTED) throw new ChatProtocolException("Illegal state for message request: " + state);
+                if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message request: " + state);
                 if (USER_ALL.equals(reciever)) {
                     for (ServerConnectionHandler handler : connectionRegistry.values()) {
                         handler.sendData(sender, reciever, type, payload);
@@ -160,24 +138,8 @@ public class ServerConnectionHandler {
         }
     }
 
-    public void sendData(String sender, String receiver, String type, String payload) {
-        if (connection.isAvailable()) {
-            new StringBuilder();
-            String data = new StringBuilder()
-                .append(sender+"\n")
-                .append(receiver+"\n")
-                .append(type+"\n")
-                .append(payload+"\n")
-                .toString();
-            try {
-                connection.send(data);
-            } catch (SocketException e) {
-                System.out.println("Connection closed: " + e.getMessage());
-            } catch (EOFException e) {
-                System.out.println("Connection terminated by remote");
-            } catch(IOException e) {
-                System.out.println("Communication error: " + e.getMessage());
-            }
+        @Override
+        public void run() {
+            startReceiving();
         }
-    }
 }
