@@ -71,8 +71,6 @@ public class Server {
                  Thread connectionHandlerThread = new Thread(connectionHandler);
                  connectionHandlerThread.start();
 
-                 // TODO: This invwoke makes that the counter for the cleints rises +1 to what it schould be
-                 //ServerConnectionHandler connectionHandlerObsolete = new ServerConnectionHandler(connection, connections);
                  System.out.println(String.format("Connected new Client %s with IP:Port <%s:%d>",
                      ((ServerConnectionHandler) connectionHandler).getUserName(),
                      connection.getRemoteHost(),
