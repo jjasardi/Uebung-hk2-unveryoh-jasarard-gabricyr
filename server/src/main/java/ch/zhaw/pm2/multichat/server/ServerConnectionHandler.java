@@ -6,7 +6,6 @@ import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
@@ -54,7 +53,7 @@ public class ServerConnectionHandler implements Runnable{
         try {
             System.out.println("Start receiving data...");
             while (connection.isAvailable()) {
-                String data = connection.receive(); //hier ist das Problem !!!
+                String data = connection.receive();
                 processData(data);
             }
             System.out.println("Stopped recieving data");
