@@ -1,5 +1,6 @@
 package ch.zhaw.pm2.multichat.client;
 
+import ch.zhaw.pm2.multichat.Message;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
@@ -179,15 +180,15 @@ public class ChatWindowController {
     }
 
     public void addMessage(String sender, String receiver, String message) {
-        messagesDecorator.addMessage(ClientMessageList.MessageType.MESSAGE, sender, receiver, message);
+        messagesDecorator.addMessage(new Message(Message.MessageType.MESSAGE, sender, receiver, message));
     }
 
     public void addInfo(String message) {
-        messagesDecorator.addMessage(ClientMessageList.MessageType.INFO, null, null, message);
+        messagesDecorator.addMessage(new Message(Message.MessageType.INFO, null, null, message));
     }
 
     public void addError(String message) {
-        messagesDecorator.addMessage(ClientMessageList.MessageType.ERROR, null, null, message);
+        messagesDecorator.addMessage(new Message(Message.MessageType.ERROR, null, null, message));
     }
 
     public void clearMessageArea() {
@@ -213,28 +214,25 @@ public class ChatWindowController {
 
     private void writeFilteredMessages(String filter) {
 		boolean showAll = filter == null || filter.isBlank();
-        List<String> senderList = messagesDecorator.getSenderList();
-        List<String> receiverList = messagesDecorator.getReceiverList();
-        List<String> messageList = messagesDecorator.getMessageList();
-        List<ClientMessageList.MessageType> typeList = messagesDecorator.getTypeList();
+        List<Message> messageList = messagesDecorator.getMessageList();
 		clearMessageArea();
-		for(int i=0; i<messagesDecorator.getSenderList().size(); i++) {
-		    String sender = Objects.requireNonNullElse(senderList.get(i),"");
-		    String receiver = Objects.requireNonNullElse(receiverList.get(i),"");
-		    String message = Objects.requireNonNull(messageList.get(i), "");
+        for (Message message : messageList) {
+            String sender = Objects.requireNonNullElse(message.getSender(),"");
+		    String receiver = Objects.requireNonNullElse(message.getReceiver(),"");
+		    String text = Objects.requireNonNull(message.getText(), "");
 			if(showAll ||
 					sender.contains(filter) ||
 					receiver.contains(filter) ||
-					message.contains(filter))
+					text.contains(filter))
 			{
-			    switch (typeList.get(i)) {
-                    case MESSAGE: writeMessage(senderList.get(i), receiverList.get(i), messageList.get(i)); break;
-                    case ERROR: writeError(messageList.get(i)); break;
-                    case INFO: writeInfo(messageList.get(i)); break;
-                    default: writeError("Unexpected message type: " + typeList.get(i));
+			    switch (message.getType()) {
+                    case MESSAGE: writeMessage(message.getSender(), message.getReceiver(), message.getText()); break;
+                    case ERROR: writeError(message.getText()); break;
+                    case INFO: writeInfo(message.getText()); break;
+                    default: writeError("Unexpected message type: " + message.getType());
                 }
 			}
-		}
+        }
 	}
 
 
