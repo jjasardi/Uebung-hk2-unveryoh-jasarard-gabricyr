@@ -3,37 +3,16 @@ package ch.zhaw.pm2.multichat.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.zhaw.pm2.multichat.Message;
+
 public class ClientMessageList {
-	private final List<MessageType> typeList = new ArrayList<>();
-	private final List<String> senderList = new ArrayList<>();
-	private final List<String> receiverList = new ArrayList<>();
-	private final List<String> messageList = new ArrayList<>();
+	private final List<Message> messageList = new ArrayList<>();
 
-	public List<MessageType> getTypeList() {
-		return typeList;
-	}
-
-	public List<String> getSenderList() {
-		return senderList;
-	}
-
-	public List<String> getReceiverList() {
-		return receiverList;
-	}
-
-	public List<String> getMessageList() {
+	public List<Message> getMessageList() {
 		return messageList;
 	}
 
-    public void addMessage(MessageType type, String sender, String receiver, String message) {
-	    typeList.add(type);
-    	senderList.add(sender);
-    	receiverList.add(receiver);
+    public void addMessage(Message message) {
     	messageList.add(message);
     }
-
-    public enum MessageType {
-        INFO, MESSAGE, ERROR;
-    }
-
 }
