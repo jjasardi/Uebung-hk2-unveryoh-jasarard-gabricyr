@@ -29,7 +29,6 @@ public class Message {
         return text;
     }
 
-    // TODO move enum in new config file
     public enum MessageType {
         INFO, MESSAGE, ERROR;
     }
