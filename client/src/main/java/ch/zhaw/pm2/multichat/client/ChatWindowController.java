@@ -4,6 +4,7 @@ import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
+import javafx.css.Match;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,11 +14,13 @@ import javafx.scene.layout.Pane;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class ChatWindowController {
-    private final Pattern messagePattern = Pattern.compile( "^(?:@(\\w*))?\\s*(.*)$" );
+    private final Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))(\\s*)(.*)$" );
     private ClientConnectionHandler connectionHandler;
     private ClientMessageList messages;
 
@@ -87,7 +90,7 @@ public class ChatWindowController {
         Matcher matcher = messagePattern.matcher(messageString);
         if (matcher.find()) {
             String receiver = matcher.group(1);
-            String message = matcher.group(2);
+            String message = matcher.group(3);
             if (receiver == null || receiver.isBlank()) receiver = ConnectionHandler.USER_ALL;
             try {
                 connectionHandler.message(receiver, message);
@@ -106,6 +109,7 @@ public class ChatWindowController {
 
     private void startConnectionHandler() throws IOException {
         String userName = userNameField.getText();
+
         String serverAddress = serverAddressField.getText();
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
