@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class ChatWindowController {
-    private final Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))(\\s*)(.*)$" );
+    private final Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientConnectionHandler connectionHandler;
     private ClientMessageList messages;
 
