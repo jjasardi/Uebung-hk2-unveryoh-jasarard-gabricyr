@@ -1,6 +1,8 @@
 package ch.zhaw.pm2.multichat;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     private final MessageType type;
     private final String sender;
     private final String receiver;
