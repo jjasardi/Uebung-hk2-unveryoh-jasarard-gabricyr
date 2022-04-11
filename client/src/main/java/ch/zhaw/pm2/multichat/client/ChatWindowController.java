@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatWindowController {
-    private final Pattern messagePattern = Pattern.compile( "^(?:@(\\w*))?\\s*(.*)$" );
+    private final static Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientConnectionHandler connectionHandler;
     private ClientMessageListDecorator messagesDecorator;
 
@@ -100,7 +100,7 @@ public class ChatWindowController {
         Matcher matcher = messagePattern.matcher(messageString);
         if (matcher.find()) {
             String receiver = matcher.group(1);
-            String message = matcher.group(2);
+            String message = matcher.group(3);
             if (receiver == null || receiver.isBlank()) receiver = ConnectionHandler.USER_ALL;
             try {
                 connectionHandler.message(receiver, message);
@@ -119,6 +119,7 @@ public class ChatWindowController {
 
     private void startConnectionHandler() throws IOException {
         String userName = userNameField.getText();
+
         String serverAddress = serverAddressField.getText();
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
