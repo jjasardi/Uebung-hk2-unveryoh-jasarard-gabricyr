@@ -4,7 +4,6 @@ import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
-import javafx.css.Match;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -14,13 +13,11 @@ import javafx.scene.layout.Pane;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class ChatWindowController {
-    private final Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private final static Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientConnectionHandler connectionHandler;
     private ClientMessageList messages;
 
