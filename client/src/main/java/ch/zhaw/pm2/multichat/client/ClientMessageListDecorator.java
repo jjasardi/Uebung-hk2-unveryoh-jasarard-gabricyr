@@ -3,7 +3,7 @@ package ch.zhaw.pm2.multichat.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.zhaw.pm2.multichat.client.ClientMessageList.MessageType;
+import ch.zhaw.pm2.multichat.Message;
 
 /**
  * Adds observable functionality to one ClientMessageList-object.
@@ -29,24 +29,12 @@ public class ClientMessageListDecorator implements IsObservable {
         listener.remove(observer);
     }
 
-    public List<MessageType> getTypeList() {
-		return clientMessageList.getTypeList();
-	}
-
-	public List<String> getSenderList() {
-		return clientMessageList.getSenderList();
-	}
-
-	public List<String> getReceiverList() {
-		return clientMessageList.getReceiverList();
-	}
-
-	public List<String> getMessageList() {
+	public List<Message> getMessageList() {
 		return clientMessageList.getMessageList();
 	}
 
-    public void addMessage(MessageType type, String sender, String receiver, String message) {
-        clientMessageList.addMessage(type, sender, receiver, message);
+    public void addMessage(Message message) {
+        clientMessageList.addMessage(message);
         informListener();
     }
     
