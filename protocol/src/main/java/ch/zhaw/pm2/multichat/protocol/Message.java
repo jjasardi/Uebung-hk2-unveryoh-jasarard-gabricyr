@@ -1,4 +1,4 @@
-package ch.zhaw.pm2.multichat;
+package ch.zhaw.pm2.multichat.protocol;
 
 import java.io.Serializable;
 

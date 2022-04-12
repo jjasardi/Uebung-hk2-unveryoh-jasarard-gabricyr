@@ -1,5 +1,7 @@
 package ch.zhaw.pm2.multichat.client;
 
+import ch.zhaw.pm2.multichat.protocol.Message;
+
 import java.util.ArrayList;
 import java.util.List;
 

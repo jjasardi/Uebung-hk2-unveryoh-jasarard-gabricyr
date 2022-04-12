@@ -1,5 +1,6 @@
 package ch.zhaw.pm2.multichat.server;
 
+import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 import java.io.IOException;

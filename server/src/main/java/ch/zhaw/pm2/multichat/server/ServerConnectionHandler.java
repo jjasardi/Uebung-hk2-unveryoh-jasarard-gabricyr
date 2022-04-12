@@ -1,5 +1,7 @@
 package ch.zhaw.pm2.multichat.server;
 
+import ch.zhaw.pm2.multichat.protocol.Message;
+import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;

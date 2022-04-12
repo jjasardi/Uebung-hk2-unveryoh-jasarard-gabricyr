@@ -1,5 +1,7 @@
 package ch.zhaw.pm2.multichat.protocol;
 
+import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
