@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
     private final MessageType type;
-    private final String sender;
+    private String sender;
     private final String receiver;
     private final String text;
 
@@ -31,7 +31,11 @@ public class Message implements Serializable {
         return text;
     }
 
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
     public enum MessageType {
-        INFO, MESSAGE, ERROR;
+        CONNECT, CONFIRM, DISCONNECT, INFO, MESSAGE, ERROR
     }
 }
