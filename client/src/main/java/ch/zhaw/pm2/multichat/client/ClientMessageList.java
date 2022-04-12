@@ -5,8 +5,6 @@ import ch.zhaw.pm2.multichat.protocol.Message;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.zhaw.pm2.multichat.Message;
-
 public class ClientMessageList {
 	private final List<Message> messageList = new ArrayList<>();
 

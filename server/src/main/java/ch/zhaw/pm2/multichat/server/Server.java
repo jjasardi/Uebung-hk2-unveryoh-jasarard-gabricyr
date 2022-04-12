@@ -12,7 +12,7 @@ import java.util.Map;
 public class Server {
 
     // Server connection
-    private NetworkHandler.NetworkServer<String> networkServer;
+    private NetworkHandler.NetworkServer<Message> networkServer;
 
     // Connection registry
     private Map<String,ServerConnectionHandler> connections = new HashMap<>();
@@ -66,7 +66,7 @@ public class Server {
         System.out.println("Server started.");
         try {
             while (true) {
-                 NetworkHandler.NetworkConnection<String> connection = networkServer.waitForConnection();
+                 NetworkHandler.NetworkConnection<Message> connection = networkServer.waitForConnection();
 
                  Runnable connectionHandler = new ServerConnectionHandler(connection, connections);
                  Thread connectionHandlerThread = new Thread(connectionHandler);
