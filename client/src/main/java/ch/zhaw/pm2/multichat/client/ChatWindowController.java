@@ -61,10 +61,16 @@ public class ChatWindowController {
 
     @FXML
     private void toggleConnection () {
-        if (connectionHandler == null || connectionHandler.getState() != ConnectionHandler.State.CONNECTED) {
-            connect();
+        if(userNameField.getText().matches("^(\\S*)?")) {
+            if (connectionHandler == null || connectionHandler.getState() != ConnectionHandler.State.CONNECTED) {
+                connect();
+            } else {
+                disconnect();
+            }
         } else {
-            disconnect();
+            writeError("Invalid username!");
+            writeInfo("Please enter a username without containing a whitespace.");
+            return;
         }
     }
 
