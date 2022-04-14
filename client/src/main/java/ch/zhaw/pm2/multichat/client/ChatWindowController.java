@@ -189,18 +189,6 @@ public class ChatWindowController {
         });
     }
 
-    public void addMessage(String sender, String receiver, String message) {
-        messagesDecorator.addMessage(new Message(MessageType.MESSAGE, sender, receiver, message));
-    }
-
-    public void addInfo(String message) {
-        messagesDecorator.addMessage(new Message(MessageType.INFO, null, null, message));
-    }
-
-    public void addError(String message) {
-        messagesDecorator.addMessage(new Message(MessageType.ERROR, null, null, message));
-    }
-
     public void clearMessageArea() {
         this.messageArea.clear();
     }
