@@ -6,18 +6,24 @@ import ch.zhaw.pm2.multichat.protocol.Config.State;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
+<<<<<<< HEAD
+=======
+import ch.zhaw.pm2.multichat.ClientInfo;
+import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
+import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
+>>>>>>> afdf5c6 (replace ChatWindowController in ClientConnectionHandler with ClientInfo)
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 public class ClientConnectionHandler extends ConnectionHandler {
-    private final ChatWindowController controller;
+    private final ClientInfo clientInfo;
     private State state = State.NEW;
     private String userName = getUserName();
 
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
                                    String userName,
-                                   ChatWindowController controller)  {
+                                   ClientInfo clientInfo)  {
         super(connection, userName);
-        this.controller = controller;
+        this.clientInfo = clientInfo;
     }
 
     public State getState() {
@@ -59,15 +65,15 @@ public class ClientConnectionHandler extends ConnectionHandler {
     protected void handleConfirm(Message message) {
         if (state == State.CONFIRM_CONNECT) {
             this.userName = message.getReceiver();
-            controller.setUserName(getUserName());
-            controller.setServerPort(getConnection().getRemotePort());
-            controller.setServerAddress(getConnection().getRemoteHost());
-            controller.addInfo(message.getText());
+            clientInfo.setUserName(getUserName());
+            clientInfo.setServerPort(getConnection().getRemotePort());
+            clientInfo.setServerAddress(getConnection().getRemoteHost());
+            addInfo(message.getText());
             System.out.println("CONFIRM: " + message.getText());
             setState(State.CONNECTED);
 
         } else if (state == State.CONFIRM_DISCONNECT) {
-            controller.addInfo(message.getText());
+            addInfo(message.getText());
             System.out.println("CONFIRM: " + message.getText());
             setState(State.DISCONNECTED);
 
@@ -82,7 +88,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
             System.out.println("DISCONNECT: Already in disconnected: " + message.getText());
             return;
         }
-        controller.addInfo(message.getText());
+        addInfo(message.getText());
         System.out.println("DISCONNECT: " + message.getText());
         setState(State.DISCONNECTED);
     }
@@ -93,13 +99,13 @@ public class ClientConnectionHandler extends ConnectionHandler {
             System.out.println("MESSAGE: Illegal state " + state + " for message: " + message.getText());
             return;
         }
-        controller.addMessage(message.getSender(), message.getReceiver(), message.getText());
+        addMessage(message.getSender(), message.getReceiver(), message.getText());
         System.out.println("MESSAGE: From " + message.getSender() + " to " + message.getReceiver() + ": "+  message.getText());
     }
 
     @Override
     protected void handleError(Message message) {
-        controller.addError(message.getText());
+        addError(message.getText());
         System.out.println("ERROR: " + message.getText());
     }
 
@@ -108,4 +114,15 @@ public class ClientConnectionHandler extends ConnectionHandler {
         this.setState(State.DISCONNECTED);
     }
 
+    private void addMessage(String sender, String receiver, String message) {
+        clientInfo.addMessage(new Message(Message.MessageType.MESSAGE, sender, receiver, message));
+    }
+
+    private void addInfo(String message) {
+        clientInfo.addMessage(new Message(Message.MessageType.INFO, null, null, message));
+    }
+
+    private void addError(String message) {
+        clientInfo.addMessage(new Message(Message.MessageType.ERROR, null, null, message));
+    }
 }
