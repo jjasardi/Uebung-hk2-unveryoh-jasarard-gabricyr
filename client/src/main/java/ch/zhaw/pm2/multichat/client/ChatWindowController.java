@@ -1,8 +1,8 @@
 package ch.zhaw.pm2.multichat.client;
 
-import ch.zhaw.pm2.multichat.Message;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
+import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
 import javafx.event.EventHandler;

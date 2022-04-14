@@ -1,5 +1,7 @@
 package ch.zhaw.pm2.multichat.server;
 
+import ch.zhaw.pm2.multichat.protocol.Message;
+import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
@@ -9,16 +11,15 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Scanner;
 
-public class ServerConnectionHandler extends ConnectionHandler implements Runnable {
-    private final NetworkHandler.NetworkConnection<String> connection;
+public class ServerConnectionHandler extends ConnectionHandler {
+    private final NetworkHandler.NetworkConnection<Message> connection;
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
     private String userName = getUserName();
     private State state = State.NEW;
 
-    public ServerConnectionHandler (NetworkHandler.NetworkConnection<String> connection,
+    public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         super(connection);
         Objects.requireNonNull(connection, "Connection must not be null");
@@ -32,7 +33,7 @@ public class ServerConnectionHandler extends ConnectionHandler implements Runnab
         try {
             System.out.println("Start receiving data...");
             while (connection.isAvailable()) {
-                String data = connection.receive();
+                Message data = connection.receive();
                 processData(data);
             }
             System.out.println("Stopped recieving data");
@@ -52,94 +53,67 @@ public class ServerConnectionHandler extends ConnectionHandler implements Runnab
         System.out.println("Stopping Connection Handler for " + userName);
     }
 
-    public void stopReceiving() {
-        System.out.println("Closing Connection Handler for " + userName);
-        try {
-            System.out.println("Stop receiving data...");
-            connection.close();
-            System.out.println("Stopped receiving data.");
-        } catch (IOException e) {
-            System.err.println("Failed to close connection." + e);
+    @Override
+    protected void handleConnect(Message message) throws ChatProtocolException {
+        if (this.state != State.NEW) {
+            throw new ChatProtocolException("Illegal state for connect request: " + state);
         }
-        System.out.println("Closed Connection Handler for " + userName);
+        if (message.getReceiver() == null || message.getSender().isBlank()) {
+            message.setSender(this.userName);
+        }
+        if (connectionRegistry.containsKey(message.getSender())) {
+            throw new ChatProtocolException("User name already taken: " + message.getSender());
+        }
+        this.userName = message.getSender();
+        connectionRegistry.put(userName, this);
+        sendData(new Message(MessageType.CONFIRM, USER_NONE, userName, "Registration successfull for " + userName));
+        this.state = State.CONNECTED;
     }
 
-    private void processData(String data)  {
-        try {
-            // parse data content
-            Scanner scanner = new Scanner(data);
-            String sender = null;
-            String reciever = null;
-            String type = null;
-            String payload = null;
-            if (scanner.hasNextLine()) {
-                sender = scanner.nextLine();
-            } else {
-                throw new ChatProtocolException("No Sender found");
-            }
-            if (scanner.hasNextLine()) {
-                reciever = scanner.nextLine();
-            } else {
-                throw new ChatProtocolException("No Reciever found");
-            }
-            if (scanner.hasNextLine()) {
-                type = scanner.nextLine();
-            } else {
-                throw new ChatProtocolException("No Type found");
-            }
-            if (scanner.hasNextLine()) {
-                payload = scanner.nextLine();
-            }
+    @Override
+    protected void handleConfirm(Message message) {
+        System.out.println("Not expecting to receive a CONFIRM request from client");
+    }
 
-            // dispatch operation based on type parameter
-            if (type.equals(DATA_TYPE_CONNECT)) {
-                if (this.state != State.NEW) throw new ChatProtocolException("Illegal state for connect request: " + state);
-                if (sender == null || sender.isBlank()) sender = this.userName;
-                if (connectionRegistry.containsKey(sender))
-                    throw new ChatProtocolException("User name already taken: " + sender);
-                this.userName = sender;
-                connectionRegistry.put(userName, this);
-                sendData(USER_NONE, userName, DATA_TYPE_CONFIRM, "Registration successfull for " + userName);
-                this.state = State.CONNECTED;
-            } else if (type.equals(DATA_TYPE_CONFIRM)) {
-                System.out.println("Not expecting to receive a CONFIRM request from client");
-            } else if (type.equals(DATA_TYPE_DISCONNECT)) {
-                if (state == State.DISCONNECTED)
-                    throw new ChatProtocolException("Illegal state for disconnect request: " + state);
-                if (state == State.CONNECTED) {
-                    connectionRegistry.remove(this.userName);
-                }
-                sendData(USER_NONE, userName, DATA_TYPE_CONFIRM, "Confirm disconnect of " + userName);
-                this.state = State.DISCONNECTED;
-                this.stopReceiving();
-            } else if (type.equals(DATA_TYPE_MESSAGE)) {
-                if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message request: " + state);
-                if (USER_ALL.equals(reciever)) {
-                    for (ServerConnectionHandler handler : connectionRegistry.values()) {
-                        handler.sendData(sender, reciever, type, payload);
-                    }
-                } else {
-                    ServerConnectionHandler handler = connectionRegistry.get(reciever);
-                    if (handler != null) {
-                        handler.sendData(sender, reciever, type, payload);
-                    } else {
-                        this.sendData(USER_NONE, userName, DATA_TYPE_ERROR, "Unknown User: " + reciever);
-                    }
-                }
-            } else if (type.equals(DATA_TYPE_ERROR)) {
-                System.err.println("Received error from client (" + sender + "): " + payload);
-            } else {
-                System.err.println("Unknown data type received: " + type);
+    @Override
+    protected void handleDisconnect(Message message) throws ChatProtocolException {
+        if (state == State.DISCONNECTED) {
+            throw new ChatProtocolException("Illegal state for disconnect request: " + state);
+        }
+        if (state == State.CONNECTED) {
+            connectionRegistry.remove(this.userName);
+        }
+        sendData(new Message(MessageType.CONFIRM, USER_NONE, userName, "Confirm disconnect of " + userName));
+        this.state = State.DISCONNECTED;
+        this.stopReceiving();
+    }
 
+    @Override
+    protected void handleMessage(Message message) throws ChatProtocolException {
+        if (state != State.CONNECTED) {
+            throw new ChatProtocolException("Illegal state for message request: " + state);
+        }
+        if (USER_ALL.equals(message.getReceiver())) {
+            for (ServerConnectionHandler handler : connectionRegistry.values()) {
+                handler.sendData(new Message(message.getType(), message.getSender(), message.getReceiver(), message.getText()));
             }
-        } catch(ChatProtocolException e) {
-            System.out.println("Error while processing data" + e.getMessage());
-            sendData(USER_NONE, userName, DATA_TYPE_ERROR, e.getMessage());
+        } else {
+            ServerConnectionHandler handler = connectionRegistry.get(message.getReceiver());
+            if (handler != null) {
+                handler.sendData(new Message(message.getType(), message.getSender(), message.getReceiver(), message.getText()));
+            } else {
+                this.sendData(new Message(MessageType.ERROR, USER_NONE, userName, "Unknown User: " + message.getReceiver()));
+            }
         }
     }
 
-        @Override
-        public void run() {
-            startReceiving();
-        }
+    @Override
+    protected void handleError(Message message) {
+        System.err.println("Received error from client (" + message.getSender() + "): " + message.getText());
+    }
+
+    @Override
+    public void run() {
+        startReceiving();
+    }
 }

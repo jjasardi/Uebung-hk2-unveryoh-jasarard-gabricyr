@@ -1,5 +1,7 @@
 package ch.zhaw.pm2.multichat.protocol;
 
+import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
@@ -8,17 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
-public abstract class ConnectionHandler {
-    private final NetworkHandler.NetworkConnection<String> connection;
+public abstract class ConnectionHandler implements Runnable {
+    private final NetworkHandler.NetworkConnection<Message> connection;
     private static final AtomicInteger connectionCounter = new AtomicInteger(0);
     private final int connectionId = connectionCounter.incrementAndGet();
-
-    // Data types used for the Chat Protocol
-    public static final String DATA_TYPE_CONNECT = "CONNECT";
-    public static final String DATA_TYPE_CONFIRM = "CONFIRM";
-    public static final String DATA_TYPE_DISCONNECT = "DISCONNECT";
-    public static final String DATA_TYPE_MESSAGE = "MESSAGE";
-    public static final String DATA_TYPE_ERROR = "ERROR";
 
     public static final String USER_NONE = "";
     public static final String USER_ALL = "*";
@@ -32,7 +27,7 @@ public abstract class ConnectionHandler {
     /**
      * @param connection
      */
-    public ConnectionHandler(NetworkHandler.NetworkConnection<String> connection, String userName) {
+    protected ConnectionHandler(NetworkHandler.NetworkConnection<Message> connection, String userName) {
         this.connection = connection;
         this.userName = userName;
     }
@@ -40,7 +35,7 @@ public abstract class ConnectionHandler {
     /**
      * @param connection
      */
-    public ConnectionHandler(NetworkHandler.NetworkConnection<String> connection) {
+    protected ConnectionHandler(NetworkHandler.NetworkConnection<Message> connection) {
         this.connection = connection;
         this.userName = "Anonymous-" + connectionId;
     }
@@ -49,7 +44,7 @@ public abstract class ConnectionHandler {
         return this.userName;
     }
 
-    public NetworkHandler.NetworkConnection<String> getConnection() {
+    public NetworkHandler.NetworkConnection<Message> getConnection() {
         return this.connection;
     }
 
@@ -68,24 +63,64 @@ public abstract class ConnectionHandler {
         System.out.println("Closed Connection Handler for " + getUserName());
     }
 
+    protected void processData(Message message) {
+        try {
+            switch (message.getType()) {
+                case CONNECT -> handleConnect(message);
+                case CONFIRM -> handleConfirm(message);
+                case DISCONNECT -> handleDisconnect(message);
+                case MESSAGE -> handleMessage(message);
+                case ERROR -> handleError(message);
+                default -> System.out.println("Unknown data type received: " + message.getType());
+            }
+        } catch (ChatProtocolException e) {
+            System.err.println("Error while processing data: " + e.getMessage());
+            sendData(new Message(MessageType.ERROR, USER_NONE, getUserName(), e.getMessage()));
+        }
+    }
 
     /**
-     * @param sender
-     * @param receiver
-     * @param type
-     * @param payload
+     *
+     * @throws ChatProtocolException
      */
-    public void sendData(String sender, String receiver, String type, String payload) {
+    protected abstract void handleConnect(Message messsage) throws ChatProtocolException;
+
+    /**
+     *
+     * @param message
+     */
+    protected abstract void handleConfirm(Message message);
+
+    /**
+     *
+     * @param message
+     * @throws ChatProtocolException
+     */
+    protected abstract void handleDisconnect(Message message) throws ChatProtocolException;
+
+
+    /**
+     *
+     * @param message
+     * @throws ChatProtocolException
+     */
+    protected abstract void handleMessage(Message message) throws ChatProtocolException;
+
+
+    /**
+     *
+     * @param message
+     */
+    protected abstract void handleError(Message message);
+
+
+    /**
+     * @param message
+     */
+    public void sendData(Message message) {
         if (connection.isAvailable()) {
-            new StringBuilder();
-            String data = new StringBuilder()
-                .append(sender+"\n")
-                .append(receiver+"\n")
-                .append(type+"\n")
-                .append(payload+"\n")
-                .toString();
             try {
-                connection.send(data);
+                connection.send(message);
             } catch (SocketException e) {
                 System.err.println("Connection closed: " + e.getMessage());
             } catch (EOFException e) {
