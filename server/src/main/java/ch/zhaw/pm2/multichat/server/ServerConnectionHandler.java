@@ -12,7 +12,7 @@ import java.net.SocketException;
 import java.util.Map;
 import java.util.Objects;
 
-public class ServerConnectionHandler extends ConnectionHandler implements Runnable {
+public class ServerConnectionHandler extends ConnectionHandler {
     private final NetworkHandler.NetworkConnection<Message> connection;
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 

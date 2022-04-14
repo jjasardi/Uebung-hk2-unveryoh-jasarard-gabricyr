@@ -10,7 +10,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
 
-public class ClientConnectionHandler extends ConnectionHandler implements Runnable {
+public class ClientConnectionHandler extends ConnectionHandler {
     private final ChatWindowController controller;
     private State state = State.NEW;
     private String userName = getUserName();

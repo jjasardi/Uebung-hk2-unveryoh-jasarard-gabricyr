@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
-public abstract class ConnectionHandler {
+public abstract class ConnectionHandler implements Runnable {
     private final NetworkHandler.NetworkConnection<Message> connection;
     private static final AtomicInteger connectionCounter = new AtomicInteger(0);
     private final int connectionId = connectionCounter.incrementAndGet();
