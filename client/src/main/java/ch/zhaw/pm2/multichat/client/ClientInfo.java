@@ -1,4 +1,4 @@
-package ch.zhaw.pm2.multichat;
+package ch.zhaw.pm2.multichat.client;
 
 import ch.zhaw.pm2.multichat.protocol.Message;
 import javafx.beans.property.IntegerProperty;

@@ -6,12 +6,7 @@ import ch.zhaw.pm2.multichat.protocol.Config.State;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
-<<<<<<< HEAD
-=======
 import ch.zhaw.pm2.multichat.ClientInfo;
-import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
-import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
->>>>>>> afdf5c6 (replace ChatWindowController in ClientConnectionHandler with ClientInfo)
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 public class ClientConnectionHandler extends ConnectionHandler {

@@ -1,5 +1,6 @@
 package ch.zhaw.pm2.multichat.client;
 
+import ch.zhaw.pm2.multichat.ClientInfo;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
@@ -133,7 +134,7 @@ public class ChatWindowController {
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
             NetworkHandler.openConnection(serverAddress, serverPort), userName,
-            this);
+            new ClientInfo());
         new Thread(connectionHandler).start();
 
         // register window close handler
