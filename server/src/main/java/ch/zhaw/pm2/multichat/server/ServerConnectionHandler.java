@@ -22,10 +22,16 @@ public class ServerConnectionHandler extends ConnectionHandler {
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         super(connection);
-        this.userName = "Anonymous-" + connectionId;
+        checkIfUserNameIsSet();
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
         this.connectionRegistry = registry;
+    }
+
+    private void checkIfUserNameIsSet() {
+        if (Config.USER_NONE.equals(userName)) {
+            this.userName = "Anonymous-" + CONNECTION_ID;
+        }
     }
 
     @Override
