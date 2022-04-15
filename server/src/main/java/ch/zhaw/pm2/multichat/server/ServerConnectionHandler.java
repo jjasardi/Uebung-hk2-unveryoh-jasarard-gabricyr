@@ -15,8 +15,8 @@ import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
 public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
-    private static final AtomicInteger connectionCounter = new AtomicInteger(0);
-    private final int connectionId = connectionCounter.incrementAndGet();
+    private static final AtomicInteger CONNECTION_COUNTER= new AtomicInteger(0);
+    private static final int CONNECTION_ID = CONNECTION_COUNTER.incrementAndGet();
     private State state = State.NEW;
 
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
