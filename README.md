@@ -43,7 +43,7 @@ A quick overview of the refactoring process:
 
 ### Structure
 
-Please check out the [class diagram](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/tree/main/diagram) of the project!
+__Please check out the [class diagram](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/tree/main/diagram) of the project!__
 
 #### Inheritance:
 
