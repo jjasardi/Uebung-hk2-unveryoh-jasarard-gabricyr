@@ -48,7 +48,10 @@ public class ChatWindowController {
         serverPortField.textProperty().bind(clientInfo.serverPortProperty().asString());
         serverAddressField.textProperty().bindBidirectional(clientInfo.serverAddressProperty());
         clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
-            stateChanged(newValue);
+            Platform.runLater(() -> connectButton.setText((newValue) ? "Disconnect" : "Connect"));
+            if (!newValue) {
+                terminateConnectionHandler();
+            }
         });
         clientInfo.messageListProperty().addListener(new ListChangeListener<Message>() {
             public void onChanged(ListChangeListener.Change<? extends Message> c) {
@@ -135,14 +138,6 @@ public class ChatWindowController {
 
         // register window close handler
         rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
-    }
-
-    public void stateChanged(boolean isConnected) {
-        // update UI (need to be run in UI thread: see Platform.runLater())
-        Platform.runLater(() -> connectButton.setText((isConnected || !isConnected) ? "Disconnect" : "Connect"));
-            if (!isConnected) {
-                terminateConnectionHandler();
-            }
     }
 
     private void terminateConnectionHandler() {
