@@ -65,7 +65,7 @@ public class Server {
     private void start() {
         System.out.println("Server started.");
         try {
-            while (true) {
+            while (!networkServer.isClosed()) {
                  NetworkHandler.NetworkConnection<Message> connection = networkServer.waitForConnection();
 
                  Runnable connectionHandler = new ServerConnectionHandler(connection, connections);
