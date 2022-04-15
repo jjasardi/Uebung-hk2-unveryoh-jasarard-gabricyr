@@ -27,7 +27,11 @@ public class ClientConnectionHandler extends ConnectionHandler {
 
     public void setState (State newState) {
         this.state = newState;
-        controller.stateChanged(newState);
+        if (newState == State.CONNECTED) {
+            clientInfo.setIsConnected(true);
+        } else if (newState == State.DISCONNECTED) {
+            clientInfo.setIsConnected(false);
+        }
     }
 
     public void run () {

@@ -1,6 +1,5 @@
 package ch.zhaw.pm2.multichat.client;
 
-import ch.zhaw.pm2.multichat.ClientInfo;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
@@ -25,6 +24,7 @@ import static ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 
 public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private ClientInfo clientInfo;
     private ClientConnectionHandler connectionHandler;
     private ClientMessageListDecorator messagesDecorator;
 
@@ -43,10 +43,17 @@ public class ChatWindowController {
 
     @FXML
     public void initialize() {
-        serverAddressField.setText(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
-        serverPortField.setText(String.valueOf(NetworkHandler.DEFAULT_PORT));
-        stateChanged(State.NEW);
-        setClientMessageListDecorator();
+        clientInfo = new ClientInfo();
+
+        userNameField.textProperty().bind(clientInfo.userNameProperty());
+        serverPortField.textProperty().bind(clientInfo.serverPortProperty().asString());
+        serverAddressField.textProperty().bind(clientInfo.serverAddressProperty());
+        clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
+            Platform.runLater(() -> connectButton.setText((newValue || !newValue) ? "Disconnect" : "Connect"));
+            if (!newValue) {
+                terminateConnectionHandler();
+            }
+        });
     }
 
     private void setClientMessageListDecorator() {
@@ -134,7 +141,7 @@ public class ChatWindowController {
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
             NetworkHandler.openConnection(serverAddress, serverPort), userName,
-            new ClientInfo());
+            clientInfo);
         new Thread(connectionHandler).start();
 
         // register window close handler
@@ -148,46 +155,6 @@ public class ChatWindowController {
             connectionHandler.stopReceiving();
             connectionHandler = null;
         }
-    }
-
-    public void stateChanged(State newState) {
-        // update UI (need to be run in UI thread: see Platform.runLater())
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                connectButton.setText((newState == State.CONNECTED || newState == State.CONFIRM_DISCONNECT) ? "Disconnect" : "Connect");
-            }
-        });
-        if (newState == State.DISCONNECTED) {
-            terminateConnectionHandler();
-        }
-    }
-
-    public void setUserName(String userName) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                userNameField.setText(userName);
-            }
-        });
-    }
-
-    public void setServerAddress(String serverAddress) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                serverAddressField.setText(serverAddress);
-            }
-        });
-    }
-
-    public void setServerPort(int serverPort) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                serverPortField.setText(Integer.toString(serverPort));
-            }
-        });
     }
 
     public void clearMessageArea() {
