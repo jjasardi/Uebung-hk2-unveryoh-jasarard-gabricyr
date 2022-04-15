@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+/**
+ * This class represents the multichat {@link Server} and contains the main method. <br>
+ * It also contains the thread for the {@link Server} object.
+ */
 public class Server {
 
     // Server connection
@@ -55,6 +59,12 @@ public class Server {
         }
     }
 
+    /**
+     * This constructor creates a {@link Server} object.
+     *
+     * @param serverPort    given server port.
+     * @throws IOException  exception if an error occures while creating the {@link Server} the new port.
+     */
     public Server(int serverPort) throws IOException {
         // Open server connection
         System.out.println("Create server connection");
@@ -88,6 +98,9 @@ public class Server {
         System.out.println("Server Stopped.");
     }
 
+    /**
+     * This method closes the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkServer}.
+     */
     public void terminate() {
         try {
             System.out.println("Close server port.");

@@ -8,10 +8,21 @@ import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
+/**
+ * This class manages the connection and the communication with the server. <br>
+ * It also executes different actions depending on the type of the message received.
+ */
 public class ClientConnectionHandler extends ConnectionHandler {
     private final ClientInfo clientInfo;
     private State state = State.NEW;
 
+    /**
+     * This constructor creates a new {@link ClientConnectionHandler} object.
+     *
+     * @param connection    the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}
+     *                      which will be given to the superclass constructer.
+     * @param clientInfo    {@link ClientInfo} field.
+     */
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
                                    ClientInfo clientInfo)  {
         super(connection);
@@ -35,18 +46,37 @@ public class ClientConnectionHandler extends ConnectionHandler {
         startReceiving();
     }
 
+    /**
+     * This method sends a message to the server with the username and the {@link MessageType#CONNECT} type. <br>
+     * Then it updates the {@link State} to {@link State#CONFIRM_CONNECT}.
+     *
+     * @throws ChatProtocolException   exception if the {@link State} is not {@link State#NEW}.
+     */
     public void connect() throws ChatProtocolException {
         if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
         this.sendData(new Message(MessageType.CONNECT, clientInfo.getUserName(), Config.USER_NONE, null));
         this.setState(State.CONFIRM_CONNECT);
     }
 
+    /**
+     * This method sends a message to the server to disconnect the current user. <br>
+     * Then it updates the {@link State} to {@link State#CONFIRM_DISCONNECT}.
+     *
+     * @throws ChatProtocolException   exception if the {@link State} is not {@link State#NEW} and not {@link State#CONNECTED}.
+     */
     public void disconnect() throws ChatProtocolException {
         if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
         this.sendData(new Message(MessageType.DISCONNECT, clientInfo.getUserName(), Config.USER_NONE, null));
         this.setState(State.CONFIRM_DISCONNECT);
     }
 
+    /**
+     * This method sends a message to the receiver.
+     *
+     * @param receiver --> wird sowieso angepasst beim refactoring (Message message)
+     * @param message  --> wird sowieso angepasst beim refactoring (Message message)
+     * @throws ChatProtocolException    exception if the {@link State} is not {@link State#CONNECTED}.
+     */
     public void message(String receiver, String message) throws ChatProtocolException {
         if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
         this.sendData(new Message(MessageType.MESSAGE, clientInfo.getUserName(), receiver, message));

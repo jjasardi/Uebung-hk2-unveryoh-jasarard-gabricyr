@@ -9,16 +9,17 @@ import java.net.SocketException;
 import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
 
 /**
- *
+ * This abstract class contains methods for the communication between server and client.
  */
 public abstract class ConnectionHandler implements Runnable {
     private final NetworkHandler.NetworkConnection<Message> connection;
 
     protected String userName = USER_NONE;
 
-
     /**
-     * @param connection
+     * This constructor initializes the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection} field.
+     *
+     * @param connection  {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection} field to be initialized.
      */
     protected ConnectionHandler(NetworkHandler.NetworkConnection<Message> connection) {
         this.connection = connection;
@@ -33,7 +34,7 @@ public abstract class ConnectionHandler implements Runnable {
     }
 
     /**
-     *
+     * This method receives the messages. Different actions are executed depending on the exceptions catched.
      */
     public void startReceiving() {
         System.out.println("Starting Connection Handler for " + userName);
@@ -61,7 +62,7 @@ public abstract class ConnectionHandler implements Runnable {
     }
 
     /**
-     *
+     * This method stops receiving the messages by closing the current connection.
      */
     public void stopReceiving() {
         System.out.println("Closing Connection Handler for " + getUserName());
@@ -75,6 +76,11 @@ public abstract class ConnectionHandler implements Runnable {
         System.out.println("Closed Connection Handler for " + getUserName());
     }
 
+    /**
+     * This method reads the message. Then it handles differently depending on the {@link MessageType}.
+     *
+     * @param message  {@link Message} field to be read.
+     */
     protected void processData(Message message) {
         try {
             switch (message.getType()) {
@@ -92,47 +98,61 @@ public abstract class ConnectionHandler implements Runnable {
     }
 
     /**
+     * This abstract method is called when the {@link MessageType} is {@link MessageType#CONNECT}. <br>
+     * It handles it differently depending on the subclass.
      *
-     * @throws ChatProtocolException
+     * @param messsage                 {@link Message} field.
+     * @throws ChatProtocolException   if an exception occures in the chat protocol, it will be thrown.
      */
     protected abstract void handleConnect(Message messsage) throws ChatProtocolException;
 
     /**
+     * This abstract method is called when the {@link MessageType} is {@link MessageType#CONFIRM}. <br>
+     * It handles it differently depending on the subclass.
      *
-     * @param message
+     * @param message  {@link Message} field.
      */
     protected abstract void handleConfirm(Message message);
 
     /**
+     * This abstract method is called when the {@link MessageType} is {@link MessageType#DISCONNECT}. <br>
+     * It handles it differently depending on the subclass.
      *
-     * @param message
-     * @throws ChatProtocolException
+     * @param message                  {@link Message} field.
+     * @throws ChatProtocolException   if an exception occures in the chat protocol, it will be thrown.
      */
     protected abstract void handleDisconnect(Message message) throws ChatProtocolException;
 
 
     /**
+     * This abstract method is called when the {@link MessageType} is {@link MessageType#MESSAGE}. <br>
+     * It handles it differently depending on the subclass.
      *
-     * @param message
-     * @throws ChatProtocolException
+     * @param message                  {@link Message} field.
+     * @throws ChatProtocolException   if an exception occures in the chat protocol, it will be thrown.
      */
     protected abstract void handleMessage(Message message) throws ChatProtocolException;
 
 
     /**
+     * This abstract method is called when the {@link MessageType} is {@link MessageType#ERROR}. <br>
+     * It handles it differently depending on the subclass.
      *
-     * @param message
+     * @param message  {@link Message} field.
      */
     protected abstract void handleError(Message message);
 
     /**
-     *
+     * This method is called when the connection is interrupted.
+     * It handles it differently depending on the subclass.
      */
     protected abstract void onInterrupted();
 
 
     /**
-     * @param message
+     * This method sends the {@link Message} object over the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}.
+     *
+     * @param message  {@link Message} to be sent.
      */
     public void sendData(Message message) {
         if (connection.isAvailable()) {

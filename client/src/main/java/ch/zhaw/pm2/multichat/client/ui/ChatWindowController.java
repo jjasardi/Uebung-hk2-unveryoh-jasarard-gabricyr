@@ -24,6 +24,9 @@ import java.util.regex.Pattern;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
+/**
+ * This class is a controller. It manages the communication between view and model.
+ */
 public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientInfo clientInfo;
@@ -42,6 +45,9 @@ public class ChatWindowController {
     @FXML private TextField filterValue;
 
 
+    /**
+     * This method binds the fields from the {@link ClientUI} with the {@link ClientInfo} properties.
+     */
     @FXML
     public void initialize() {
         clientInfo = new ClientInfo();
@@ -152,10 +158,12 @@ public class ChatWindowController {
         }
     }
 
+    /**
+     * This method clears the message area.
+     */
     public void clearMessageArea() {
         this.messageArea.clear();
     }
-
 
     private void redrawMessageList() {
         Platform.runLater(() -> writeFilteredMessages(filterValue.getText().strip()));
@@ -197,6 +205,9 @@ public class ChatWindowController {
 	}
 
 
+    /**
+     * This class handles the closing of the {@link ClientUI}.
+     */
     class WindowCloseHandler implements EventHandler<WindowEvent> {
         @Override
         public void handle(WindowEvent event) {
