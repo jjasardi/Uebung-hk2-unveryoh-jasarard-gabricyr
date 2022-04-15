@@ -12,12 +12,10 @@ import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 public class ClientConnectionHandler extends ConnectionHandler {
     private final ClientInfo clientInfo;
     private State state = State.NEW;
-    private String userName = getUserName();
 
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
-                                   String userName,
                                    ClientInfo clientInfo)  {
-        super(connection, userName);
+        super(connection);
         this.clientInfo = clientInfo;
     }
 

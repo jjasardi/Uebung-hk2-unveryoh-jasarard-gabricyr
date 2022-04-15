@@ -2,6 +2,8 @@ package ch.zhaw.pm2.multichat.client;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.Config;
+import ch.zhaw.pm2.multichat.protocol.ClientInfo;
+import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
@@ -126,12 +128,11 @@ public class ChatWindowController {
     }
 
     private void startConnectionHandler() throws IOException {
-        String userName = userNameField.getText();
 
         String serverAddress = serverAddressField.getText();
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
-            NetworkHandler.openConnection(serverAddress, serverPort), userName,
+            NetworkHandler.openConnection(serverAddress, serverPort),
             clientInfo);
         new Thread(connectionHandler).start();
 
