@@ -2,8 +2,6 @@ package ch.zhaw.pm2.multichat.client;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.Config;
-import ch.zhaw.pm2.multichat.protocol.ClientInfo;
-import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
@@ -23,7 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
-import static ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 
 public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
