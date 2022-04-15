@@ -28,7 +28,7 @@ The functionality was mostly given. The only thing was that not more then one cl
 
 ### Approach
 
-All issues are documented in the [GitHub Issue register (see "Closed" for closed issues)](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/issues) .  
+All issues are documented in the [GitHub Issue register](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/issues) (see "Closed" for closed issues).  
 The issues are split up in [Functional](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/blob/main/.github/ISSUE_TEMPLATE/functional-bug.md) and [Structural](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/blob/main/.github/ISSUE_TEMPLATE/structural-bug.md) issues.
 To make it clear we defined two [issue templates](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/tree/main/.github/ISSUE_TEMPLATE).
 
