@@ -34,7 +34,7 @@ dependencies {
 // Configuration for Application plugin
 application {
     // Define the main class for the application.
-    mainClass = 'ch.zhaw.pm2.multichat.client.Client'
+    mainClass = 'ch.zhaw.pm2.multichat.client.ui.Client'
 }
 
 javafx {

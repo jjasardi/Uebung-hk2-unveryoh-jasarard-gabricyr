@@ -1,5 +1,7 @@
-package ch.zhaw.pm2.multichat.client;
+package ch.zhaw.pm2.multichat.client.ui;
 
+import ch.zhaw.pm2.multichat.client.ClientConnectionHandler;
+import ch.zhaw.pm2.multichat.client.ClientInfo;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
@@ -81,6 +83,7 @@ public class ChatWindowController {
 
     private void connect() {
         try {
+
             startConnectionHandler();
             connectionHandler.connect();
         } catch(ChatProtocolException | IOException e) {
@@ -201,8 +204,4 @@ public class ChatWindowController {
         }
 
     }
-
-
-
-
 }

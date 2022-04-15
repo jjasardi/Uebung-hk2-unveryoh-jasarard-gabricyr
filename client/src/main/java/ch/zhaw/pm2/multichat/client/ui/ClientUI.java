@@ -1,4 +1,4 @@
-package ch.zhaw.pm2.multichat.client;
+package ch.zhaw.pm2.multichat.client.ui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

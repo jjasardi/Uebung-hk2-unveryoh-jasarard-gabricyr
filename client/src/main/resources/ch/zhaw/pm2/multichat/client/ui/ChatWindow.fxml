@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="rootPane" minWidth="-Infinity" prefHeight="500.0" prefWidth="420.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.zhaw.pm2.multichat.client.ChatWindowController">
+<BorderPane fx:id="rootPane" minWidth="-Infinity" prefHeight="500.0" prefWidth="420.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.zhaw.pm2.multichat.client.ui.ChatWindowController">
    <top>
       <VBox BorderPane.alignment="CENTER">
          <children>
