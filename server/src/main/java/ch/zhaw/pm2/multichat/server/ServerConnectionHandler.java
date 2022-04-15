@@ -1,22 +1,18 @@
 package ch.zhaw.pm2.multichat.server;
 
 import ch.zhaw.pm2.multichat.protocol.Config;
-import ch.zhaw.pm2.multichat.protocol.Message;
-import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
+import ch.zhaw.pm2.multichat.protocol.Message;
+import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.SocketException;
 import java.util.Map;
 import java.util.Objects;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
-public class ServerConnectionHandler extends ConnectionHandler implements Runnable {
-    private final NetworkHandler.NetworkConnection<Message> connection;
+public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
     private String userName = getUserName();
@@ -27,33 +23,7 @@ public class ServerConnectionHandler extends ConnectionHandler implements Runnab
         super(connection);
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
-        this.connection = connection;
         this.connectionRegistry = registry;
-    }
-
-    public void startReceiving() {
-        System.out.println("Starting Connection Handler for " + userName);
-        try {
-            System.out.println("Start receiving data...");
-            while (connection.isAvailable()) {
-                Message data = connection.receive();
-                processData(data);
-            }
-            System.out.println("Stopped recieving data");
-        } catch (SocketException e) {
-            System.out.println("Connection terminated locally");
-            connectionRegistry.remove(userName);
-            System.out.println("Unregistered because client connection terminated: " + userName + " " + e.getMessage());
-        } catch (EOFException e) {
-            System.out.println("Connection terminated by remote");
-            connectionRegistry.remove(userName);
-            System.out.println("Unregistered because client connection terminated: " + userName + " " + e.getMessage());
-        } catch(IOException e) {
-            System.err.println("Communication error: " + e);
-        } catch(ClassNotFoundException e) {
-            System.err.println("Received object of unknown type: " + e.getMessage());
-        }
-        System.out.println("Stopping Connection Handler for " + userName);
     }
 
     @Override
@@ -113,6 +83,11 @@ public class ServerConnectionHandler extends ConnectionHandler implements Runnab
     @Override
     protected void handleError(Message message) {
         System.err.println("Received error from client (" + message.getSender() + "): " + message.getText());
+    }
+
+    @Override
+    protected void onInterrupted() {
+        connectionRegistry.remove(userName);
     }
 
     @Override

@@ -8,10 +8,6 @@ import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.SocketException;
-
 public class ClientConnectionHandler extends ConnectionHandler {
     private final ChatWindowController controller;
     private State state = State.NEW;
@@ -35,31 +31,6 @@ public class ClientConnectionHandler extends ConnectionHandler {
 
     public void run () {
         startReceiving();
-    }
-
-    public void startReceiving() {
-        System.out.println("Starting Connection Handler");
-        try {
-            System.out.println("Start receiving data...");
-            while (getConnection().isAvailable()) {
-                Message data = getConnection().receive();
-                processData(data);
-            }
-            System.out.println("Stopped recieving data");
-        } catch (SocketException e) {
-            System.out.println("Connection terminated locally");
-            this.setState(State.DISCONNECTED);
-            System.err.println("Unregistered because connection terminated" + e.getMessage());
-        } catch (EOFException e) {
-            System.out.println("Connection terminated by remote");
-            this.setState(State.DISCONNECTED);
-            System.err.println("Unregistered because connection terminated" + e.getMessage());
-        } catch(IOException e) {
-            System.err.println("Communication error" + e);
-        } catch(ClassNotFoundException e) {
-            System.err.println("Received object of unknown type" + e.getMessage());
-        }
-        System.out.println("Stopped Connection Handler");
     }
 
     public void connect() throws ChatProtocolException {
@@ -130,6 +101,11 @@ public class ClientConnectionHandler extends ConnectionHandler {
     protected void handleError(Message message) {
         controller.addError(message.getText());
         System.out.println("ERROR: " + message.getText());
+    }
+
+    @Override
+    protected void onInterrupted() {
+        this.setState(State.DISCONNECTED);
     }
 
 }

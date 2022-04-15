@@ -47,6 +47,34 @@ public abstract class ConnectionHandler implements Runnable {
     /**
      *
      */
+    public void startReceiving() {
+        System.out.println("Starting Connection Handler for " + userName);
+        try {
+            System.out.println("Start receiving data...");
+            while (connection.isAvailable()) {
+                Message data = connection.receive();
+                processData(data);
+            }
+            System.out.println("Stopped recieving data");
+        } catch (SocketException e) {
+            System.out.println("Connection terminated locally");
+            onInterrupted();
+            System.out.println("Unregistered because client connection terminated: " + userName + " " + e.getMessage());
+        } catch (EOFException e) {
+            System.out.println("Connection terminated by remote");
+            onInterrupted();
+            System.out.println("Unregistered because client connection terminated: " + userName + " " + e.getMessage());
+        } catch(IOException e) {
+            System.err.println("Communication error: " + e);
+        } catch(ClassNotFoundException e) {
+            System.err.println("Received object of unknown type: " + e.getMessage());
+        }
+        System.out.println("Stopping Connection Handler for " + userName);
+    }
+
+    /**
+     *
+     */
     public void stopReceiving() {
         System.out.println("Closing Connection Handler for " + getUserName());
         try {
@@ -108,6 +136,11 @@ public abstract class ConnectionHandler implements Runnable {
      * @param message
      */
     protected abstract void handleError(Message message);
+
+    /**
+     *
+     */
+    protected abstract void onInterrupted();
 
 
     /**
