@@ -9,18 +9,20 @@ import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
 public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
-
-    private String userName = getUserName();
-    private Config.State state = Config.State.NEW;
+    private static final AtomicInteger connectionCounter = new AtomicInteger(0);
+    private final int connectionId = connectionCounter.incrementAndGet();
+    private State state = State.NEW;
 
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         super(connection);
+        this.userName = "Anonymous-" + connectionId;
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
         this.connectionRegistry = registry;

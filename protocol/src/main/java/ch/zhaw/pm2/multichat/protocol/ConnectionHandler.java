@@ -5,7 +5,6 @@ import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
 
@@ -14,26 +13,15 @@ import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
  */
 public abstract class ConnectionHandler implements Runnable {
     private final NetworkHandler.NetworkConnection<Message> connection;
-    private static final AtomicInteger connectionCounter = new AtomicInteger(0);
-    private final int connectionId = connectionCounter.incrementAndGet();
 
-    private String userName = USER_NONE;
+    protected String userName = USER_NONE;
 
-
-    /**
-     * @param connection
-     */
-    protected ConnectionHandler(NetworkHandler.NetworkConnection<Message> connection, String userName) {
-        this.connection = connection;
-        this.userName = userName;
-    }
 
     /**
      * @param connection
      */
     protected ConnectionHandler(NetworkHandler.NetworkConnection<Message> connection) {
         this.connection = connection;
-        this.userName = "Anonymous-" + connectionId;
     }
 
     public String getUserName() {

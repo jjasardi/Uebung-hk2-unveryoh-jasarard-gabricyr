@@ -1,10 +1,13 @@
-package ch.zhaw.pm2.multichat.client;
+package ch.zhaw.pm2.multichat.client.ui;
 
+import ch.zhaw.pm2.multichat.client.ClientConnectionHandler;
+import ch.zhaw.pm2.multichat.client.ClientInfo;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -20,12 +23,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
-import static ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 
 public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private ClientInfo clientInfo;
     private ClientConnectionHandler connectionHandler;
-    private ClientMessageListDecorator messagesDecorator;
 
     private final WindowCloseHandler windowCloseHandler = new WindowCloseHandler();
 
@@ -42,17 +44,19 @@ public class ChatWindowController {
 
     @FXML
     public void initialize() {
-        serverAddressField.setText(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
-        serverPortField.setText(String.valueOf(NetworkHandler.DEFAULT_PORT));
-        stateChanged(State.NEW);
-        setClientMessageListDecorator();
-    }
+        clientInfo = new ClientInfo();
 
-    private void setClientMessageListDecorator() {
-        messagesDecorator = new ClientMessageListDecorator(new ClientMessageList());
-        messagesDecorator.addListener(new IsObserver() {
-            @Override
-            public void update() {
+        userNameField.textProperty().bindBidirectional(clientInfo.userNameProperty());
+        serverPortField.textProperty().bind(clientInfo.serverPortProperty().asString());
+        serverAddressField.textProperty().bindBidirectional(clientInfo.serverAddressProperty());
+        clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
+            Platform.runLater(() -> connectButton.setText((newValue) ? "Disconnect" : "Connect"));
+            if (!newValue) {
+                terminateConnectionHandler();
+            }
+        });
+        clientInfo.messageListProperty().addListener(new ListChangeListener<Message>() {
+            public void onChanged(ListChangeListener.Change<? extends Message> c) {
                 redrawMessageList();
             }
         });
@@ -79,7 +83,7 @@ public class ChatWindowController {
 
     private void connect() {
         try {
-            setClientMessageListDecorator();
+
             startConnectionHandler();
             connectionHandler.connect();
         } catch(ChatProtocolException | IOException e) {
@@ -127,13 +131,12 @@ public class ChatWindowController {
     }
 
     private void startConnectionHandler() throws IOException {
-        String userName = userNameField.getText();
 
         String serverAddress = serverAddressField.getText();
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
-            NetworkHandler.openConnection(serverAddress, serverPort), userName,
-            this);
+            NetworkHandler.openConnection(serverAddress, serverPort),
+            clientInfo);
         new Thread(connectionHandler).start();
 
         // register window close handler
@@ -147,58 +150,6 @@ public class ChatWindowController {
             connectionHandler.stopReceiving();
             connectionHandler = null;
         }
-    }
-
-    public void stateChanged(State newState) {
-        // update UI (need to be run in UI thread: see Platform.runLater())
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                connectButton.setText((newState == State.CONNECTED || newState == State.CONFIRM_DISCONNECT) ? "Disconnect" : "Connect");
-            }
-        });
-        if (newState == State.DISCONNECTED) {
-            terminateConnectionHandler();
-        }
-    }
-
-    public void setUserName(String userName) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                userNameField.setText(userName);
-            }
-        });
-    }
-
-    public void setServerAddress(String serverAddress) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                serverAddressField.setText(serverAddress);
-            }
-        });
-    }
-
-    public void setServerPort(int serverPort) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                serverPortField.setText(Integer.toString(serverPort));
-            }
-        });
-    }
-
-    public void addMessage(String sender, String receiver, String message) {
-        messagesDecorator.addMessage(new Message(MessageType.MESSAGE, sender, receiver, message));
-    }
-
-    public void addInfo(String message) {
-        messagesDecorator.addMessage(new Message(MessageType.INFO, null, null, message));
-    }
-
-    public void addError(String message) {
-        messagesDecorator.addMessage(new Message(MessageType.ERROR, null, null, message));
     }
 
     public void clearMessageArea() {
@@ -224,7 +175,7 @@ public class ChatWindowController {
 
     private void writeFilteredMessages(String filter) {
 		boolean showAll = filter == null || filter.isBlank();
-        List<Message> messageList = messagesDecorator.getMessageList();
+        List<Message> messageList = clientInfo.messageListProperty();
 		clearMessageArea();
         for (Message message : messageList) {
             String sender = Objects.requireNonNullElse(message.getSender(),"");
@@ -253,8 +204,4 @@ public class ChatWindowController {
         }
 
     }
-
-
-
-
 }
