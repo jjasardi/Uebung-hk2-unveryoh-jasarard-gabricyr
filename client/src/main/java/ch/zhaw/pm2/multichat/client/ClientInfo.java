@@ -1,5 +1,6 @@
 package ch.zhaw.pm2.multichat.client;
 
+import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.beans.property.BooleanProperty;
@@ -24,6 +25,7 @@ public class ClientInfo {
         serverAddress.set(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
         serverPort.set(NetworkHandler.DEFAULT_PORT);
         isConnected.set(false);
+        userName.set(Config.USER_NONE);
 
         ObservableList<Message> observableList = FXCollections.observableArrayList();
         messageList = new SimpleListProperty<>(observableList);
