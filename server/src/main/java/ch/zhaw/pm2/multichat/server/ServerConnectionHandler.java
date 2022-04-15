@@ -59,7 +59,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         this.userName = message.getSender();
         connectionRegistry.put(userName, this);
-        sendData(new Message(MessageType.CONFIRM, Config.USER_NONE, userName, "Registration successful for " + userName));
+        sendData(new Message(Config.USER_NONE, userName, MessageType.CONFIRM, "Registration successfull for " + userName));
         this.state = State.CONNECTED;
     }
 
@@ -76,7 +76,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         if (state == State.CONNECTED) {
             connectionRegistry.remove(this.userName);
         }
-        sendData(new Message(MessageType.CONFIRM, Config.USER_NONE, userName, "Confirm disconnect of " + userName));
+        sendData(new Message(Config.USER_NONE, userName, MessageType.CONFIRM, "Confirm disconnect of " + userName));
         this.state = State.DISCONNECTED;
         this.stopReceiving();
     }
@@ -88,21 +88,21 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         if (Config.USER_ALL.equals(message.getReceiver())) {
             for (ServerConnectionHandler handler : connectionRegistry.values()) {
-                handler.sendData(new Message(message.getType(), message.getSender(), message.getReceiver(), message.getText()));
+                handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(), message.getPayload()));
             }
         } else {
             ServerConnectionHandler handler = connectionRegistry.get(message.getReceiver());
             if (handler != null) {
-                handler.sendData(new Message(message.getType(), message.getSender(), message.getReceiver(), message.getText()));
+                handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(), message.getPayload()));
             } else {
-                this.sendData(new Message(MessageType.ERROR, Config.USER_NONE, userName, "Unknown User: " + message.getReceiver()));
+                this.sendData(new Message(Config.USER_NONE, userName, MessageType.ERROR, "Unknown User: " + message.getReceiver()));
             }
         }
     }
 
     @Override
     protected void handleError(Message message) {
-        System.err.println("Received error from client (" + message.getSender() + "): " + message.getText());
+        System.err.println("Received error from client (" + message.getSender() + "): " + message.getPayload());
     }
 
     @Override

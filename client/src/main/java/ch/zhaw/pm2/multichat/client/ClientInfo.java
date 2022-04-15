@@ -40,18 +40,6 @@ public class ClientInfo {
         return userName.get();
     }
 
-    public final String getServerPort() {
-        return serverPort.get();
-    }
-
-    public final String getServerAddress() {
-        return serverAddress.get();
-    }
-
-    public final boolean getIsConnected() {
-        return isConnected.get();
-    }
-
     public final void setUserName(String userName) {
         this.userName.set(userName);
     }

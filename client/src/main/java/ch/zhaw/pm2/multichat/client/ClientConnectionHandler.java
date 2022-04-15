@@ -57,7 +57,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
      */
     public void connect() throws ChatProtocolException {
         if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
-        this.sendData(new Message(MessageType.CONNECT, clientInfo.getUserName(), Config.USER_NONE, null));
+        this.sendData(new Message(clientInfo.getUserName(), Config.USER_NONE, MessageType.CONNECT, null));
         this.setState(State.CONFIRM_CONNECT);
     }
 
@@ -69,7 +69,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
      */
     public void disconnect() throws ChatProtocolException {
         if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
-        this.sendData(new Message(MessageType.DISCONNECT, clientInfo.getUserName(), Config.USER_NONE, null));
+        this.sendData(new Message(clientInfo.getUserName(), Config.USER_NONE, MessageType.DISCONNECT, null));
         this.setState(State.CONFIRM_DISCONNECT);
     }
 
@@ -82,7 +82,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
      */
     public void message(String receiver, String message) throws ChatProtocolException {
         if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
-        this.sendData(new Message(MessageType.MESSAGE, clientInfo.getUserName(), receiver, message));
+        this.sendData(new Message(clientInfo.getUserName(), receiver, MessageType.MESSAGE, message));
     }
 
     @Override
@@ -97,45 +97,45 @@ public class ClientConnectionHandler extends ConnectionHandler {
             clientInfo.setUserName(this.userName);
             clientInfo.setServerPort(String.valueOf(getConnection().getRemotePort()));
             clientInfo.setServerAddress(getConnection().getRemoteHost());
-            addInfo(message.getText());
-            System.out.println("CONFIRM: " + message.getText());
+            addInfo(message);
+            System.out.println("CONFIRM: " + message.getPayload());
             setState(State.CONNECTED);
 
         } else if (state == State.CONFIRM_DISCONNECT) {
-            addInfo(message.getText());
-            System.out.println("CONFIRM: " + message.getText());
+            addInfo(message);
+            System.out.println("CONFIRM: " + message.getPayload());
             setState(State.DISCONNECTED);
 
         } else {
-            System.err.println("Got unexpected confirm message: " + message.getText());
+            System.err.println("Got unexpected confirm message: " + message.getPayload());
         }
     }
 
     @Override
     protected void handleDisconnect(Message message) {
         if (state == State.DISCONNECTED) {
-            System.out.println("DISCONNECT: Already in disconnected: " + message.getText());
+            System.out.println("DISCONNECT: Already in disconnected: " + message.getPayload());
             return;
         }
-        addInfo(message.getText());
-        System.out.println("DISCONNECT: " + message.getText());
+        addInfo(message);
+        System.out.println("DISCONNECT: " + message.getPayload());
         setState(State.DISCONNECTED);
     }
 
     @Override
     protected void handleMessage(Message message) {
         if (state != State.CONNECTED) {
-            System.out.println("MESSAGE: Illegal state " + state + " for message: " + message.getText());
+            System.out.println("MESSAGE: Illegal state " + state + " for message: " + message.getPayload());
             return;
         }
-        addMessage(message.getSender(), message.getReceiver(), message.getText());
-        System.out.println("MESSAGE: From " + message.getSender() + " to " + message.getReceiver() + ": "+  message.getText());
+        addMessage(message);
+        System.out.println("MESSAGE: From " + message.getSender() + " to " + message.getReceiver() + ": "+  message.getPayload());
     }
 
     @Override
     protected void handleError(Message message) {
-        addError(message.getText());
-        System.out.println("ERROR: " + message.getText());
+        addError(message);
+        System.out.println("ERROR: " + message.getPayload());
     }
 
     @Override
@@ -143,15 +143,15 @@ public class ClientConnectionHandler extends ConnectionHandler {
         this.setState(State.DISCONNECTED);
     }
 
-    private void addMessage(String sender, String receiver, String message) {
-        clientInfo.addMessage(new Message(Message.MessageType.MESSAGE, sender, receiver, message));
+    private void addMessage(Message message) {
+        clientInfo.addMessage(new Message(message.getSender(), message.getReceiver(), Message.MessageType.MESSAGE, message.getPayload()));
     }
 
-    private void addInfo(String message) {
-        clientInfo.addMessage(new Message(Message.MessageType.INFO, null, null, message));
+    private void addInfo(Message message) {
+        clientInfo.addMessage(new Message(null, null, Message.MessageType.INFO, message.getPayload()));
     }
 
-    private void addError(String message) {
-        clientInfo.addMessage(new Message(Message.MessageType.ERROR, null, null, message));
+    private void addError(Message message) {
+        clientInfo.addMessage(new Message(null, null, Message.MessageType.ERROR, message.getPayload()));
     }
 }

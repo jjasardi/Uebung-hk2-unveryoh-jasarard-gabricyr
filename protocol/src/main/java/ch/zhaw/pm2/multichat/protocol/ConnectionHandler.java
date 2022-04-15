@@ -65,7 +65,7 @@ public abstract class ConnectionHandler implements Runnable {
      * This method stops receiving the messages by closing the current connection.
      */
     public void stopReceiving() {
-        System.out.println("Closing Connection Handler for " + getUserName());
+        System.out.println("Closing Connection Handler for " + userName);
         try {
             System.out.println("Stop receiving data...");
             connection.close();
@@ -73,7 +73,7 @@ public abstract class ConnectionHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Failed to close connection." + e.getMessage());
         }
-        System.out.println("Closed Connection Handler for " + getUserName());
+        System.out.println("Closed Connection Handler for " + userName);
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class ConnectionHandler implements Runnable {
             }
         } catch (ChatProtocolException e) {
             System.err.println("Error while processing data: " + e.getMessage());
-            sendData(new Message(MessageType.ERROR, USER_NONE, getUserName(), e.getMessage()));
+            sendData(new Message(USER_NONE, userName, MessageType.ERROR, e.getMessage()));
         }
     }
 

@@ -220,17 +220,17 @@ public class ChatWindowController {
         for (Message message : messageList) {
             String sender = Objects.requireNonNullElse(message.getSender(),"");
 		    String receiver = Objects.requireNonNullElse(message.getReceiver(),"");
-		    String text = Objects.requireNonNull(message.getText(), "");
+		    String text = Objects.requireNonNull(message.getPayload(), "");
 			if(showAll ||
 					sender.contains(filter) ||
 					receiver.contains(filter) ||
 					text.contains(filter))
 			{
-			    switch (message.getType()) {
-                    case MESSAGE: writeMessage(message.getSender(), message.getReceiver(), message.getText()); break;
-                    case ERROR: writeError(message.getText()); break;
-                    case INFO: writeInfo(message.getText()); break;
-                    default: writeError("Unexpected message type: " + message.getType());
+                switch (message.getType()) {
+                    case MESSAGE -> writeMessage(message.getSender(), message.getReceiver(), message.getPayload());
+                    case ERROR -> writeError(message.getPayload());
+                    case INFO -> writeInfo(message.getPayload());
+                    default -> writeError("Unexpected message type: " + message.getType());
                 }
 			}
         }
