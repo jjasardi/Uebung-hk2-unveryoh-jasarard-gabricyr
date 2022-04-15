@@ -1,7 +1,7 @@
 package ch.zhaw.pm2.multichat.client;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
-import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
+import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
@@ -19,8 +19,11 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ch.zhaw.pm2.multichat.protocol.Config.State;
+import static ch.zhaw.pm2.multichat.protocol.Message.MessageType;
+
 public class ChatWindowController {
-    private final static Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientConnectionHandler connectionHandler;
     private ClientMessageListDecorator messagesDecorator;
 
@@ -41,7 +44,7 @@ public class ChatWindowController {
     public void initialize() {
         serverAddressField.setText(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
         serverPortField.setText(String.valueOf(NetworkHandler.DEFAULT_PORT));
-        stateChanged(ConnectionHandler.State.NEW);
+        stateChanged(State.NEW);
         setClientMessageListDecorator();
     }
 
@@ -56,13 +59,13 @@ public class ChatWindowController {
     }
 
     private void applicationClose() {
-        connectionHandler.setState(ConnectionHandler.State.DISCONNECTED);
+        connectionHandler.setState(State.DISCONNECTED);
     }
 
     @FXML
     private void toggleConnection () {
         if(userNameField.getText().matches("^(\\S*)?")) {
-            if (connectionHandler == null || connectionHandler.getState() != ConnectionHandler.State.CONNECTED) {
+            if (connectionHandler == null || connectionHandler.getState() != State.CONNECTED) {
                 connect();
             } else {
                 disconnect();
@@ -103,11 +106,11 @@ public class ChatWindowController {
             return;
         }
         String messageString = messageField.getText().strip();
-        Matcher matcher = messagePattern.matcher(messageString);
+        Matcher matcher = MESSAGE_PATTERN.matcher(messageString);
         if (matcher.find()) {
             String receiver = matcher.group(1);
             String message = matcher.group(3);
-            if (receiver == null || receiver.isBlank()) receiver = ConnectionHandler.USER_ALL;
+            if (receiver == null || receiver.isBlank()) receiver = Config.USER_ALL;
             try {
                 connectionHandler.message(receiver, message);
             } catch (ChatProtocolException e) {
@@ -146,15 +149,15 @@ public class ChatWindowController {
         }
     }
 
-    public void stateChanged(ConnectionHandler.State newState) {
+    public void stateChanged(State newState) {
         // update UI (need to be run in UI thread: see Platform.runLater())
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                connectButton.setText((newState == ConnectionHandler.State.CONNECTED || newState == ConnectionHandler.State.CONFIRM_DISCONNECT) ? "Disconnect" : "Connect");
+                connectButton.setText((newState == State.CONNECTED || newState == State.CONFIRM_DISCONNECT) ? "Disconnect" : "Connect");
             }
         });
-        if (newState == ConnectionHandler.State.DISCONNECTED) {
+        if (newState == State.DISCONNECTED) {
             terminateConnectionHandler();
         }
     }
@@ -187,15 +190,15 @@ public class ChatWindowController {
     }
 
     public void addMessage(String sender, String receiver, String message) {
-        messagesDecorator.addMessage(new Message(Message.MessageType.MESSAGE, sender, receiver, message));
+        messagesDecorator.addMessage(new Message(MessageType.MESSAGE, sender, receiver, message));
     }
 
     public void addInfo(String message) {
-        messagesDecorator.addMessage(new Message(Message.MessageType.INFO, null, null, message));
+        messagesDecorator.addMessage(new Message(MessageType.INFO, null, null, message));
     }
 
     public void addError(String message) {
-        messagesDecorator.addMessage(new Message(Message.MessageType.ERROR, null, null, message));
+        messagesDecorator.addMessage(new Message(MessageType.ERROR, null, null, message));
     }
 
     public void clearMessageArea() {
@@ -244,6 +247,7 @@ public class ChatWindowController {
 
 
     class WindowCloseHandler implements EventHandler<WindowEvent> {
+        @Override
         public void handle(WindowEvent event) {
             applicationClose();
         }

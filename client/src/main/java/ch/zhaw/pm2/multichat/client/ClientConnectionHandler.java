@@ -1,9 +1,11 @@
 package ch.zhaw.pm2.multichat.client;
 
+import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
+import ch.zhaw.pm2.multichat.protocol.Config;
+import ch.zhaw.pm2.multichat.protocol.Config.State;
+import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
-import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
-import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
 import java.io.EOFException;
@@ -62,13 +64,13 @@ public class ClientConnectionHandler extends ConnectionHandler {
 
     public void connect() throws ChatProtocolException {
         if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
-        this.sendData(new Message(MessageType.CONNECT, userName, USER_NONE, null));
+        this.sendData(new Message(MessageType.CONNECT, userName, Config.USER_NONE, null));
         this.setState(State.CONFIRM_CONNECT);
     }
 
     public void disconnect() throws ChatProtocolException {
         if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
-        this.sendData(new Message(MessageType.DISCONNECT, userName, USER_NONE, null));
+        this.sendData(new Message(MessageType.DISCONNECT, userName, Config.USER_NONE, null));
         this.setState(State.CONFIRM_DISCONNECT);
     }
 
