@@ -23,7 +23,7 @@ import static ch.zhaw.pm2.multichat.protocol.Config.State;
 import static ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 
 public class ChatWindowController {
-    private static final Pattern messagePattern = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientConnectionHandler connectionHandler;
     private ClientMessageListDecorator messagesDecorator;
 
@@ -106,7 +106,7 @@ public class ChatWindowController {
             return;
         }
         String messageString = messageField.getText().strip();
-        Matcher matcher = messagePattern.matcher(messageString);
+        Matcher matcher = MESSAGE_PATTERN.matcher(messageString);
         if (matcher.find()) {
             String receiver = matcher.group(1);
             String message = matcher.group(3);
