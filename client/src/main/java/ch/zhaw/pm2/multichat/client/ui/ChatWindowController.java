@@ -47,7 +47,7 @@ public class ChatWindowController {
         clientInfo = new ClientInfo();
 
         userNameField.textProperty().bindBidirectional(clientInfo.userNameProperty());
-        serverPortField.textProperty().bindBidirectional(clientInfo.serverPortProperty());
+        serverPortField.textProperty().bind(clientInfo.serverPortProperty().asString());
         serverAddressField.textProperty().bindBidirectional(clientInfo.serverAddressProperty());
         clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> connectButton.setText((newValue) ? "Disconnect" : "Connect"));
