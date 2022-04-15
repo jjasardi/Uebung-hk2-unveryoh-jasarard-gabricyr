@@ -1,7 +1,7 @@
-package ch.zhaw.pm2.multichat.protocol;
+package ch.zhaw.pm2.multichat.client;
 
-import java.util.List;
-
+import ch.zhaw.pm2.multichat.protocol.Message;
+import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;

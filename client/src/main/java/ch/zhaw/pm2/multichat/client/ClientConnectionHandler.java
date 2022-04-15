@@ -38,19 +38,19 @@ public class ClientConnectionHandler extends ConnectionHandler {
 
     public void connect() throws ChatProtocolException {
         if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
-        this.sendData(new Message(MessageType.CONNECT, userName, Config.USER_NONE, null));
+        this.sendData(new Message(MessageType.CONNECT, clientInfo.getUserName(), USER_NONE, null));
         this.setState(State.CONFIRM_CONNECT);
     }
 
     public void disconnect() throws ChatProtocolException {
         if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
-        this.sendData(new Message(MessageType.DISCONNECT, userName, Config.USER_NONE, null));
+        this.sendData(new Message(MessageType.DISCONNECT, clientInfo.getUserName(), USER_NONE, null));
         this.setState(State.CONFIRM_DISCONNECT);
     }
 
     public void message(String receiver, String message) throws ChatProtocolException {
         if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
-        this.sendData(new Message(MessageType.MESSAGE, userName, receiver, message));
+        this.sendData(new Message(MessageType.MESSAGE, clientInfo.getUserName(), receiver, message));
     }
 
     @Override
