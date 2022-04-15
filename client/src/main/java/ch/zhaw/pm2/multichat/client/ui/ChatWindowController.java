@@ -53,15 +53,14 @@ public class ChatWindowController {
     @FXML
     public void initialize() {
         clientInfo = new ClientInfo();
+        sendButton.setDisable(true);
 
         userNameField.textProperty().bindBidirectional(clientInfo.userNameProperty());
         serverPortField.textProperty().bindBidirectional(clientInfo.serverPortProperty());
         serverAddressField.textProperty().bindBidirectional(clientInfo.serverAddressProperty());
         clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> connectButton.setText((newValue) ? "Disconnect" : "Connect"));
-            if (!newValue) {
-                terminateConnectionHandler();
-            }
+            connectionStateChanged(newValue);
         });
         clientInfo.messageListProperty().addListener(new ListChangeListener<Message>() {
             @Override
@@ -167,6 +166,21 @@ public class ChatWindowController {
 
         // register window close handler
         rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
+    }
+
+    private void connectionStateChanged(boolean isConnected) {
+        if (!isConnected) {
+            terminateConnectionHandler();
+            sendButton.setDisable(true);
+            userNameField.editableProperty().set(true);
+            serverAddressField.editableProperty().set(true);
+            serverPortField.editableProperty().set(true);
+        } else {
+            sendButton.setDisable(false);
+            userNameField.editableProperty().set(false);
+            serverAddressField.editableProperty().set(false);
+            serverPortField.editableProperty().set(false);
+        }
     }
 
     private void terminateConnectionHandler() {
