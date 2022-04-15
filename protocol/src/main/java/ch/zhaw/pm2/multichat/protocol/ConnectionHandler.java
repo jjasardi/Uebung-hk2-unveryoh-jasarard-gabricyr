@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
+
 /**
  *
  */
@@ -15,14 +17,8 @@ public abstract class ConnectionHandler implements Runnable {
     private static final AtomicInteger connectionCounter = new AtomicInteger(0);
     private final int connectionId = connectionCounter.incrementAndGet();
 
-    public static final String USER_NONE = "";
-    public static final String USER_ALL = "*";
-
     private String userName = USER_NONE;
 
-    public enum State {
-        NEW, CONFIRM_CONNECT, CONNECTED, CONFIRM_DISCONNECT, DISCONNECTED;
-    }
 
     /**
      * @param connection

@@ -1,5 +1,6 @@
 package ch.zhaw.pm2.multichat.server;
 
+import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
 import ch.zhaw.pm2.multichat.protocol.Message;
@@ -9,11 +10,13 @@ import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import java.util.Map;
 import java.util.Objects;
 
+import static ch.zhaw.pm2.multichat.protocol.Config.State;
+
 public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
 
     private String userName = getUserName();
-    private State state = State.NEW;
+    private Config.State state = Config.State.NEW;
 
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
                                    Map<String,ServerConnectionHandler> registry) {
@@ -36,7 +39,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         this.userName = message.getSender();
         connectionRegistry.put(userName, this);
-        sendData(new Message(MessageType.CONFIRM, USER_NONE, userName, "Registration successfull for " + userName));
+        sendData(new Message(MessageType.CONFIRM, Config.USER_NONE, userName, "Registration successfull for " + userName));
         this.state = State.CONNECTED;
     }
 
@@ -53,7 +56,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         if (state == State.CONNECTED) {
             connectionRegistry.remove(this.userName);
         }
-        sendData(new Message(MessageType.CONFIRM, USER_NONE, userName, "Confirm disconnect of " + userName));
+        sendData(new Message(MessageType.CONFIRM, Config.USER_NONE, userName, "Confirm disconnect of " + userName));
         this.state = State.DISCONNECTED;
         this.stopReceiving();
     }
@@ -63,7 +66,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         if (state != State.CONNECTED) {
             throw new ChatProtocolException("Illegal state for message request: " + state);
         }
-        if (USER_ALL.equals(message.getReceiver())) {
+        if (Config.USER_ALL.equals(message.getReceiver())) {
             for (ServerConnectionHandler handler : connectionRegistry.values()) {
                 handler.sendData(new Message(message.getType(), message.getSender(), message.getReceiver(), message.getText()));
             }
@@ -72,7 +75,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
             if (handler != null) {
                 handler.sendData(new Message(message.getType(), message.getSender(), message.getReceiver(), message.getText()));
             } else {
-                this.sendData(new Message(MessageType.ERROR, USER_NONE, userName, "Unknown User: " + message.getReceiver()));
+                this.sendData(new Message(MessageType.ERROR, Config.USER_NONE, userName, "Unknown User: " + message.getReceiver()));
             }
         }
     }
