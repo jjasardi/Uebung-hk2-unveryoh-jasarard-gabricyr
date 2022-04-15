@@ -1,5 +1,7 @@
 package ch.zhaw.pm2.multichat.client;
 
+import java.util.List;
+
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.beans.property.BooleanProperty;
@@ -14,7 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class ClientInfo {
-    private final ListProperty<Message> messages;
+    private final ListProperty<Message> messageList;
     private final StringProperty userName = new SimpleStringProperty();
     private final IntegerProperty serverPort = new SimpleIntegerProperty();
     private final StringProperty serverAddress = new SimpleStringProperty();
@@ -26,7 +28,7 @@ public class ClientInfo {
         isConnected.set(false);
 
         ObservableList<Message> observableList = FXCollections.observableArrayList();
-        messages = new SimpleListProperty<>(observableList);
+        messageList = new SimpleListProperty<>(observableList);
     }
 
     public final String getUserName() {
@@ -77,7 +79,11 @@ public class ClientInfo {
         return isConnected;
     }
 
+    public final ListProperty<Message> messageListProperty() {
+        return messageList;
+    }
+
     public void addMessage(Message message) {
-        messages.add(message);
+        messageList.add(message);
     }
 }

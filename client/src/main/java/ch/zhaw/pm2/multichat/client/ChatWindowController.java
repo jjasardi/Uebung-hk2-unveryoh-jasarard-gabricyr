@@ -5,6 +5,7 @@ import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -26,7 +27,6 @@ public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
     private ClientInfo clientInfo;
     private ClientConnectionHandler connectionHandler;
-    private ClientMessageListDecorator messagesDecorator;
 
     private final WindowCloseHandler windowCloseHandler = new WindowCloseHandler();
 
@@ -45,22 +45,14 @@ public class ChatWindowController {
     public void initialize() {
         clientInfo = new ClientInfo();
 
-        userNameField.textProperty().bind(clientInfo.userNameProperty());
+        userNameField.textProperty().bindBidirectional(clientInfo.userNameProperty());
         serverPortField.textProperty().bind(clientInfo.serverPortProperty().asString());
-        serverAddressField.textProperty().bind(clientInfo.serverAddressProperty());
+        serverAddressField.textProperty().bindBidirectional(clientInfo.serverAddressProperty());
         clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
-            Platform.runLater(() -> connectButton.setText((newValue || !newValue) ? "Disconnect" : "Connect"));
-            if (!newValue) {
-                terminateConnectionHandler();
-            }
+            stateChanged(newValue);
         });
-    }
-
-    private void setClientMessageListDecorator() {
-        messagesDecorator = new ClientMessageListDecorator(new ClientMessageList());
-        messagesDecorator.addListener(new IsObserver() {
-            @Override
-            public void update() {
+        clientInfo.messageListProperty().addListener(new ListChangeListener<Message>() {
+            public void onChanged(ListChangeListener.Change<? extends Message> c) {
                 redrawMessageList();
             }
         });
@@ -87,7 +79,6 @@ public class ChatWindowController {
 
     private void connect() {
         try {
-            setClientMessageListDecorator();
             startConnectionHandler();
             connectionHandler.connect();
         } catch(ChatProtocolException | IOException e) {
@@ -148,6 +139,14 @@ public class ChatWindowController {
         rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
     }
 
+    public void stateChanged(boolean isConnected) {
+        // update UI (need to be run in UI thread: see Platform.runLater())
+        Platform.runLater(() -> connectButton.setText((isConnected || !isConnected) ? "Disconnect" : "Connect"));
+            if (!isConnected) {
+                terminateConnectionHandler();
+            }
+    }
+
     private void terminateConnectionHandler() {
         // unregister window close handler
         rootPane.getScene().getWindow().removeEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
@@ -180,7 +179,7 @@ public class ChatWindowController {
 
     private void writeFilteredMessages(String filter) {
 		boolean showAll = filter == null || filter.isBlank();
-        List<Message> messageList = messagesDecorator.getMessageList();
+        List<Message> messageList = clientInfo.messageListProperty();
 		clearMessageArea();
         for (Message message : messageList) {
             String sender = Objects.requireNonNullElse(message.getSender(),"");
