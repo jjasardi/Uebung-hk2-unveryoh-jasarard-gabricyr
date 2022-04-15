@@ -169,8 +169,8 @@ public class ChatWindowController {
         this.messageArea.appendText(String.format("[INFO] %s\n", message));
     }
 
-    private void writeMessage(String sender, String reciever, String message) {
-        this.messageArea.appendText(String.format("[%s -> %s] %s\n", sender, reciever, message));
+    private void writeMessage(String sender, String receiver, String message) {
+        this.messageArea.appendText(String.format("[%s -> %s] %s\n", sender, receiver, message));
     }
 
     private void writeFilteredMessages(String filter) {
