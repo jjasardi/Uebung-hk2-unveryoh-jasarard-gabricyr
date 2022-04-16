@@ -125,6 +125,7 @@ public class ChatWindowController {
             if (receiver == null || receiver.isBlank()) receiver = Config.USER_ALL;
             try {
                 connectionHandler.message(receiver, message);
+                messageField.clear();
             } catch (ChatProtocolException e) {
                 writeError(e.getMessage());
             }
