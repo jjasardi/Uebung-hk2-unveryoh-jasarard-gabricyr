@@ -19,8 +19,8 @@ import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
  * It also executes different actions depending on the type of the message received.
  */
 public class ServerConnectionHandler extends ConnectionHandler {
-    private final Map<String,ServerConnectionHandler> connectionRegistry;
-    private static final AtomicInteger CONNECTION_COUNTER= new AtomicInteger(1);
+    private final Map<String, ServerConnectionHandler> connectionRegistry;
+    private static final AtomicInteger CONNECTION_COUNTER = new AtomicInteger(1);
     private static int connectionID = CONNECTION_COUNTER.get();
     private State state = State.NEW;
 
@@ -31,8 +31,8 @@ public class ServerConnectionHandler extends ConnectionHandler {
      *                     which will be given to the superclass constructer.
      * @param registry     containing all the connections the server holds.
      */
-    public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
-                                   Map<String,ServerConnectionHandler> registry) {
+    public ServerConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
+            Map<String, ServerConnectionHandler> registry) {
         super(connection);
         setDefaultUsername();
         Objects.requireNonNull(connection, "Connection must not be null");
@@ -55,7 +55,8 @@ public class ServerConnectionHandler extends ConnectionHandler {
         handleExistingUser(message);
         handleCustomClient(message);
         connectionRegistry.put(getUserName(), this);
-        sendData(new Message(Config.USER_NONE, getUserName(), MessageType.CONFIRM, "Registration successfull for " + getUserName()));
+        sendData(new Message(Config.USER_NONE, getUserName(), MessageType.CONFIRM,
+                "Registration successfull for " + getUserName()));
         this.state = State.CONNECTED;
     }
 
@@ -73,7 +74,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
     }
 
     private void handleCustomClient(Message message) {
-        if(getUserName() != USER_NONE) {
+        if (!USER_NONE.equals(getUserName())) {
             setUserName(message.getSender());
         }
     }
@@ -91,7 +92,8 @@ public class ServerConnectionHandler extends ConnectionHandler {
         if (state == State.CONNECTED) {
             connectionRegistry.remove(getUserName());
         }
-        sendData(new Message(Config.USER_NONE, getUserName(), MessageType.CONFIRM, "Confirm disconnect of " + getUserName()));
+        sendData(new Message(Config.USER_NONE, getUserName(), MessageType.CONFIRM,
+                "Confirm disconnect of " + getUserName()));
         this.state = State.DISCONNECTED;
         this.stopReceiving();
     }
@@ -103,14 +105,17 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         if (Config.USER_ALL.equals(message.getReceiver())) {
             for (ServerConnectionHandler handler : connectionRegistry.values()) {
-                handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(), message.getPayload()));
+                handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(),
+                        message.getPayload()));
             }
         } else {
             ServerConnectionHandler handler = connectionRegistry.get(message.getReceiver());
             if (handler != null) {
-                handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(), message.getPayload()));
+                handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(),
+                        message.getPayload()));
             } else {
-                this.sendData(new Message(Config.USER_NONE, getUserName(), MessageType.ERROR, "Unknown User: " + message.getReceiver()));
+                this.sendData(new Message(Config.USER_NONE, getUserName(), MessageType.ERROR,
+                        "Unknown User: " + message.getReceiver()));
             }
         }
     }
