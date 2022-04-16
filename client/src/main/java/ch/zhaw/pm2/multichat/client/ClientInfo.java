@@ -4,10 +4,8 @@ import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -20,7 +18,7 @@ import javafx.collections.ObservableList;
 public class ClientInfo {
     private final ListProperty<Message> messageList;
     private final StringProperty userName = new SimpleStringProperty();
-    private final IntegerProperty serverPort = new SimpleIntegerProperty();
+    private final StringProperty serverPort = new SimpleStringProperty();
     private final StringProperty serverAddress = new SimpleStringProperty();
     private final BooleanProperty isConnected = new SimpleBooleanProperty();
 
@@ -30,7 +28,7 @@ public class ClientInfo {
      */
     public ClientInfo() {
         serverAddress.set(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
-        serverPort.set(NetworkHandler.DEFAULT_PORT);
+        serverPort.set(String.valueOf(NetworkHandler.DEFAULT_PORT));
         isConnected.set(false);
         userName.set(Config.USER_NONE);
 
@@ -42,7 +40,7 @@ public class ClientInfo {
         return userName.get();
     }
 
-    public final int getServerPort() {
+    public final String getServerPort() {
         return serverPort.get();
     }
 
@@ -58,7 +56,7 @@ public class ClientInfo {
         this.userName.set(userName);
     }
 
-    public final void setServerPort(int serverPort) {
+    public final void setServerPort(String serverPort) {
         this.serverPort.set(serverPort);
     }
 
@@ -79,10 +77,10 @@ public class ClientInfo {
     }
 
     /**
-     * This method return the server port as a IntegerProperty.
+     * This method return the server port as a StringProperty.
      * @return  serverPort
      */
-    public IntegerProperty serverPortProperty() {
+    public StringProperty serverPortProperty() {
         return serverPort;
     }
 
