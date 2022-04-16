@@ -62,6 +62,7 @@ public class ChatWindowController {
             }
         });
         clientInfo.messageListProperty().addListener(new ListChangeListener<Message>() {
+            @Override
             public void onChanged(ListChangeListener.Change<? extends Message> c) {
                 redrawMessageList();
             }
