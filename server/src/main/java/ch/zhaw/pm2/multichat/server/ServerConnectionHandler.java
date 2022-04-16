@@ -15,8 +15,8 @@ import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
 public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
-    private static final AtomicInteger CONNECTION_COUNTER= new AtomicInteger(0);
-    private static final int CONNECTION_ID = CONNECTION_COUNTER.incrementAndGet();
+    private static final AtomicInteger CONNECTION_COUNTER= new AtomicInteger(1);
+    private static int CONNECTION_ID = CONNECTION_COUNTER.get();
     private State state = State.NEW;
 
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
@@ -31,6 +31,9 @@ public class ServerConnectionHandler extends ConnectionHandler {
     private void checkIfUserNameIsSet() {
         if (Config.USER_NONE.equals(userName)) {
             this.userName = "Anonymous-" + CONNECTION_ID;
+            CONNECTION_ID = CONNECTION_COUNTER.incrementAndGet();
+        } else {
+            this.userName = getUserName();
         }
     }
 
