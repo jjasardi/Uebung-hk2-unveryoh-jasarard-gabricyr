@@ -41,7 +41,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         this.userName = message.getSender();
         connectionRegistry.put(userName, this);
-        sendData(new Message(MessageType.CONFIRM, Config.USER_NONE, userName, "Registration successfull for " + userName));
+        sendData(new Message(MessageType.CONFIRM, Config.USER_NONE, userName, "Registration successful for " + userName));
         this.state = State.CONNECTED;
     }
 

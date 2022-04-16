@@ -43,7 +43,7 @@ public abstract class ConnectionHandler implements Runnable {
                 Message data = connection.receive();
                 processData(data);
             }
-            System.out.println("Stopped recieving data");
+            System.out.println("Stopped receiving data");
         } catch (SocketException e) {
             System.out.println("Connection terminated locally");
             onInterrupted();
