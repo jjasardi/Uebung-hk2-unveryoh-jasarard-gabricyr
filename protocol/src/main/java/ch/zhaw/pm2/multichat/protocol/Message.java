@@ -1,11 +1,14 @@
 package ch.zhaw.pm2.multichat.protocol;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * This class implements {@link Serializable} and represents the data object which is sent.
  */
 public class Message implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -663906070220319087L;
     private String sender;
     private final String receiver;
     private final MessageType type;
