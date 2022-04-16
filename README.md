@@ -87,7 +87,7 @@ The sent messages should also appear in the conversation history to complete the
 
 ##### Implementation 4:
 
-An implementation could be that the server gets started automaticlly if the first clients wants to connect to a server.
+An implementation could be this [issue](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/issues/38) that the server gets started automatically if the first clients wants to connect to a server.
 A friend of him could then connect to the running server by entering the host name.
 
 
