@@ -7,6 +7,7 @@ import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -67,18 +68,34 @@ public class ChatWindowController {
     }
 
     @FXML
-    private void toggleConnection () {
-        if(userNameField.getText().matches("^(\\S*)?")) {
-            if (connectionHandler == null || connectionHandler.getState() != State.CONNECTED) {
+    private void toggleConnection() {
+        if (connectionHandler == null || connectionHandler.getState() != State.CONNECTED) {
+            if (checkIfNotAnonymous() && checkIfNoWhitespace()) {
                 connect();
-            } else {
-                disconnect();
             }
+        } else {
+            disconnect();
+        }
+    }
+
+
+    private boolean checkIfNoWhitespace(){
+        if(userNameField.getText().matches("^(\\S*)?")) {
+            return true;
         } else {
             writeError("Invalid username!");
             writeInfo("Please enter a username without containing a whitespace.");
-            return;
+            return false;
         }
+    }
+
+    private boolean checkIfNotAnonymous(){
+        if(userNameField.getText().matches("^(Anonymous-([0-9]+))+")) {
+            writeError("Invalid username!");
+            writeInfo("Username can not be 'Anonymous-N'");
+            return false;
+        }
+        return true;
     }
 
     private void connect() {
