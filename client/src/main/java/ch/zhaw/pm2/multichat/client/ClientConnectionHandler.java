@@ -27,7 +27,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
                                    ClientInfo clientInfo)  {
         super(connection);
         this.clientInfo = clientInfo;
-        this.userName = clientInfo.getUserName();
+        setUserName(clientInfo.getUserName());
     }
 
     public State getState() {
@@ -93,8 +93,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
     @Override
     protected void handleConfirm(Message message) {
         if (state == State.CONFIRM_CONNECT) {
-            this.userName = message.getReceiver();
-            clientInfo.setUserName(this.userName);
+            setUserName(message.getReceiver());
+            clientInfo.setUserName(getUserName());
             clientInfo.setServerPort(String.valueOf(getConnection().getRemotePort()));
             clientInfo.setServerAddress(getConnection().getRemoteHost());
             addInfo(message);

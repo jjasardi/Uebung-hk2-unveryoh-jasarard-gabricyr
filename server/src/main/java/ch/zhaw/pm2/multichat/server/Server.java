@@ -82,9 +82,8 @@ public class Server {
                  Thread connectionHandlerThread = new Thread(connectionHandler);
                  connectionHandlerThread.start();
 
-                 System.out.println(String.format("Connected new Client %s with IP:Port <%s:%d>",
-                     ((ServerConnectionHandler) connectionHandler).getUserName(),
-                     connection.getRemoteHost(),
+                 System.out.println(String.format("Connected with IP:Port <%s:%d>",
+                     (connection.getRemoteHost()),
                      connection.getRemotePort()
                  ));
             }

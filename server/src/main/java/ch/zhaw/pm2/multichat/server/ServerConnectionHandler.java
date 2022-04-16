@@ -41,8 +41,8 @@ public class ServerConnectionHandler extends ConnectionHandler {
     }
 
     private void setDefaultUsername() {
-        if (Config.USER_NONE.equals(userName)) {
-            this.userName = "Anonymous-" + connectionID;
+        if (Config.USER_NONE.equals(getUserName())) {
+            setUserName("Anonymous-" + connectionID);
         }
     }
 
@@ -54,14 +54,14 @@ public class ServerConnectionHandler extends ConnectionHandler {
         handleAnonymousClient(message);
         handleExistingUser(message);
         handleCustomClient(message);
-        connectionRegistry.put(userName, this);
-        sendData(new Message(Config.USER_NONE, userName, MessageType.CONFIRM, "Registration successfull for " + userName));
+        connectionRegistry.put(getUserName(), this);
+        sendData(new Message(Config.USER_NONE, getUserName(), MessageType.CONFIRM, "Registration successfull for " + getUserName()));
         this.state = State.CONNECTED;
     }
 
     private void handleAnonymousClient(Message message) {
         if (message.getReceiver() == null || message.getSender().isBlank()) {
-            message.setSender(this.userName);
+            message.setSender(getUserName());
             connectionID = CONNECTION_COUNTER.incrementAndGet();
         }
     }
@@ -73,8 +73,8 @@ public class ServerConnectionHandler extends ConnectionHandler {
     }
 
     private void handleCustomClient(Message message) {
-        if(userName != USER_NONE) {
-            this.userName = message.getSender();
+        if(getUserName() != USER_NONE) {
+            setUserName(message.getSender());
         }
     }
 
@@ -89,9 +89,9 @@ public class ServerConnectionHandler extends ConnectionHandler {
             throw new ChatProtocolException("Illegal state for disconnect request: " + state);
         }
         if (state == State.CONNECTED) {
-            connectionRegistry.remove(this.userName);
+            connectionRegistry.remove(getUserName());
         }
-        sendData(new Message(Config.USER_NONE, userName, MessageType.CONFIRM, "Confirm disconnect of " + userName));
+        sendData(new Message(Config.USER_NONE, getUserName(), MessageType.CONFIRM, "Confirm disconnect of " + getUserName()));
         this.state = State.DISCONNECTED;
         this.stopReceiving();
     }
@@ -110,7 +110,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
             if (handler != null) {
                 handler.sendData(new Message(message.getSender(), message.getReceiver(), message.getType(), message.getPayload()));
             } else {
-                this.sendData(new Message(Config.USER_NONE, userName, MessageType.ERROR, "Unknown User: " + message.getReceiver()));
+                this.sendData(new Message(Config.USER_NONE, getUserName(), MessageType.ERROR, "Unknown User: " + message.getReceiver()));
             }
         }
     }
@@ -122,7 +122,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
 
     @Override
     protected void onInterrupted() {
-        connectionRegistry.remove(userName);
+        connectionRegistry.remove(getUserName());
     }
 
     @Override

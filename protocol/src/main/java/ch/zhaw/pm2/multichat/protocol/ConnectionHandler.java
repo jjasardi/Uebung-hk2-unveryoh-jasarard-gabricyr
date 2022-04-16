@@ -14,7 +14,7 @@ import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
 public abstract class ConnectionHandler implements Runnable {
     private final NetworkHandler.NetworkConnection<Message> connection;
 
-    protected String userName = USER_NONE;
+    private String userName = USER_NONE;
 
     /**
      * This constructor initializes the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection} field.
@@ -25,8 +25,12 @@ public abstract class ConnectionHandler implements Runnable {
         this.connection = connection;
     }
 
-    public String getUserName() {
+    protected String getUserName() {
         return this.userName;
+    }
+
+    protected void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public NetworkHandler.NetworkConnection<Message> getConnection() {
