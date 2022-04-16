@@ -1,163 +1,152 @@
 package ch.zhaw.pm2.multichat.client;
 
 import ch.zhaw.pm2.multichat.protocol.ChatProtocolException;
+import ch.zhaw.pm2.multichat.protocol.Config;
+import ch.zhaw.pm2.multichat.protocol.Config.State;
 import ch.zhaw.pm2.multichat.protocol.ConnectionHandler;
+import ch.zhaw.pm2.multichat.protocol.Message;
+import ch.zhaw.pm2.multichat.protocol.Message.MessageType;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.SocketException;
-import java.util.Scanner;
-
-public class ClientConnectionHandler extends ConnectionHandler implements Runnable {
-    private final ChatWindowController controller;
+/**
+ * This class manages the connection and the communication with the server. <br>
+ * It also executes different actions depending on the type of the message received.
+ */
+public class ClientConnectionHandler extends ConnectionHandler {
+    private final ClientInfo clientInfo;
     private State state = State.NEW;
-    private String userName = getUserName();
 
-    public ClientConnectionHandler(NetworkHandler.NetworkConnection<String> connection,
-                                   String userName,
-                                   ChatWindowController controller)  {
-        super(connection, userName);
-        this.controller = controller;
+    /**
+     * This constructor creates a new {@link ClientConnectionHandler} object.
+     *
+     * @param connection    the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}
+     *                      which will be given to the superclass constructor.
+     * @param clientInfo    {@link ClientInfo} object.
+     */
+    public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
+            ClientInfo clientInfo) {
+        super(connection);
+        this.clientInfo = clientInfo;
+        setUserName(clientInfo.getUserName());
     }
 
     public State getState() {
         return this.state;
     }
 
-    public void setState (State newState) {
+    public void setState(State newState) {
         this.state = newState;
-        controller.stateChanged(newState);
+        clientInfo.updateIsConnectedProperty(newState);
     }
 
-    public void run () {
-        startReceiving();
-    }
-
-    public void startReceiving() {
-        System.out.println("Starting Connection Handler");
-        try {
-            System.out.println("Start receiving data...");
-            while (getConnection().isAvailable()) {
-                String data = getConnection().receive();
-                processData(data);
-            }
-            System.out.println("Stopped recieving data");
-        } catch (SocketException e) {
-            System.out.println("Connection terminated locally");
-            this.setState(State.DISCONNECTED);
-            System.err.println("Unregistered because connection terminated" + e.getMessage());
-        } catch (EOFException e) {
-            System.out.println("Connection terminated by remote");
-            this.setState(State.DISCONNECTED);
-            System.err.println("Unregistered because connection terminated" + e.getMessage());
-        } catch(IOException e) {
-            System.err.println("Communication error" + e);
-        } catch(ClassNotFoundException e) {
-            System.err.println("Received object of unknown type" + e.getMessage());
-        }
-        System.out.println("Stopped Connection Handler");
-    }
-
-    public void stopReceiving() {
-        System.out.println("Closing Connection Handler to Server");
-        try {
-            System.out.println("Stop receiving data...");
-            getConnection().close();
-            System.out.println("Stopped receiving data.");
-        } catch (IOException e) {
-            System.err.println("Failed to close connection." + e.getMessage());
-        }
-        System.out.println("Closed Connection Handler to Server");
-    }
-
-    private void processData(String data) {
-        try {
-            // parse data content
-            Scanner scanner = new Scanner(data);
-            String sender = null;
-            String reciever = null;
-            String type = null;
-            String payload = null;
-            if (scanner.hasNextLine()) {
-                sender = scanner.nextLine();
-            } else {
-                throw new ChatProtocolException("No Sender found");
-            }
-            if (scanner.hasNextLine()) {
-                reciever = scanner.nextLine();
-            } else {
-                throw new ChatProtocolException("No Reciever found");
-            }
-            if (scanner.hasNextLine()) {
-                type = scanner.nextLine();
-            } else {
-                throw new ChatProtocolException("No Type found");
-            }
-            if (scanner.hasNextLine()) {
-                payload = scanner.nextLine();
-            }
-            // dispatch operation based on type parameter
-            if (type.equals(DATA_TYPE_CONNECT)) {
-                System.err.println("Illegal connect request from server");
-            } else if (type.equals(DATA_TYPE_CONFIRM)) {
-                if (state == State.CONFIRM_CONNECT) {
-                    this.userName = reciever;
-                    controller.setUserName(getUserName());
-                    controller.setServerPort(getConnection().getRemotePort());
-                    controller.setServerAddress(getConnection().getRemoteHost());
-                    controller.addInfo(payload);
-                    System.out.println("CONFIRM: " + payload);
-                    this.setState(State.CONNECTED);
-                } else if (state == State.CONFIRM_DISCONNECT) {
-                    controller.addInfo(payload);
-                    System.out.println("CONFIRM: " + payload);
-                    this.setState(State.DISCONNECTED);
-                } else {
-                    System.err.println("Got unexpected confirm message: " + payload);
-                }
-            } else if (type.equals(DATA_TYPE_DISCONNECT)) {
-                if (state == State.DISCONNECTED) {
-                    System.out.println("DISCONNECT: Already in disconnected: " + payload);
-                    return;
-                }
-                controller.addInfo(payload);
-                System.out.println("DISCONNECT: " + payload);
-                this.setState(State.DISCONNECTED);
-            } else if (type.equals(DATA_TYPE_MESSAGE)) {
-                if (state != State.CONNECTED) {
-                    System.out.println("MESSAGE: Illegal state " + state + " for message: " + payload);
-                    return;
-                }
-                controller.addMessage(sender, reciever, payload);
-                System.out.println("MESSAGE: From " + sender + " to " + reciever + ": "+  payload);
-            } else if (type.equals(DATA_TYPE_ERROR)) {
-                controller.addError(payload);
-                System.out.println("ERROR: " + payload);
-            } else {
-                System.out.println("Unknown data type received: " + type);
-            }
-        } catch (ChatProtocolException e) {
-            System.err.println("Error while processing data: " + e.getMessage());
-            sendData(USER_NONE, userName, DATA_TYPE_ERROR, e.getMessage());
-        }
-    }
-
+    /**
+     * This method sends a message to the server with the username and the {@link MessageType#CONNECT} type. <br>
+     * Then it updates the {@link State} to {@link State#CONFIRM_CONNECT}.
+     *
+     * @throws ChatProtocolException   exception if the {@link State} is not {@link State#NEW}.
+     */
     public void connect() throws ChatProtocolException {
-        if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
-        this.sendData(userName, USER_NONE, DATA_TYPE_CONNECT,null);
+        if (state != State.NEW)
+            throw new ChatProtocolException("Illegal state for connect: " + state);
+        this.sendData(new Message(clientInfo.getUserName(), Config.USER_NONE, MessageType.CONNECT, null));
         this.setState(State.CONFIRM_CONNECT);
     }
 
+    /**
+     * This method sends a message to the server to disconnect the current user. <br>
+     * Then it updates the {@link State} to {@link State#CONFIRM_DISCONNECT}.
+     *
+     * @throws ChatProtocolException   exception if the {@link State} is not {@link State#NEW} and not {@link State#CONNECTED}.
+     */
     public void disconnect() throws ChatProtocolException {
-        if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
-        this.sendData(userName, USER_NONE, DATA_TYPE_DISCONNECT,null);
+        if (state != State.NEW && state != State.CONNECTED)
+            throw new ChatProtocolException("Illegal state for disconnect: " + state);
+        this.sendData(new Message(clientInfo.getUserName(), Config.USER_NONE, MessageType.DISCONNECT, null));
         this.setState(State.CONFIRM_DISCONNECT);
     }
 
+    /**
+     * This method sends a message to the receiver.
+     *
+     * @param receiver receiver
+     * @param message  message content
+     * @throws ChatProtocolException    exception if the {@link State} is not {@link State#CONNECTED}.
+     */
     public void message(String receiver, String message) throws ChatProtocolException {
-        if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
-        this.sendData(userName, receiver, DATA_TYPE_MESSAGE,message);
+        if (state != State.CONNECTED)
+            throw new ChatProtocolException("Illegal state for message: " + state);
+        this.sendData(new Message(clientInfo.getUserName(), receiver, MessageType.MESSAGE, message));
     }
 
+    @Override
+    protected void handleConnect(Message message) {
+        System.err.println("Illegal connect request from server");
+    }
+
+    @Override
+    protected void handleConfirm(Message message) {
+        if (state == State.CONFIRM_CONNECT) {
+            setUserName(message.getReceiver());
+            clientInfo.setUserName(getUserName());
+            clientInfo.setServerPort(String.valueOf(getConnection().getRemotePort()));
+            clientInfo.setServerAddress(getConnection().getRemoteHost());
+            addInfo(message);
+            System.out.println("CONFIRM: " + message.getPayload());
+            setState(State.CONNECTED);
+
+        } else if (state == State.CONFIRM_DISCONNECT) {
+            addInfo(message);
+            System.out.println("CONFIRM: " + message.getPayload());
+            setState(State.DISCONNECTED);
+
+        } else {
+            System.err.println("Got unexpected confirm message: " + message.getPayload());
+        }
+    }
+
+    @Override
+    protected void handleDisconnect(Message message) {
+        if (state == State.DISCONNECTED) {
+            System.out.println("DISCONNECT: Already in disconnected: " + message.getPayload());
+            return;
+        }
+        addInfo(message);
+        System.out.println("DISCONNECT: " + message.getPayload());
+        setState(State.DISCONNECTED);
+    }
+
+    @Override
+    protected void handleMessage(Message message) {
+        if (state != State.CONNECTED) {
+            System.out.println("MESSAGE: Illegal state " + state + " for message: " + message.getPayload());
+            return;
+        }
+        addMessage(message);
+        System.out.println(
+                "MESSAGE: From " + message.getSender() + " to " + message.getReceiver() + ": " + message.getPayload());
+    }
+
+    @Override
+    protected void handleError(Message message) {
+        addError(message);
+        System.out.println("ERROR: " + message.getPayload());
+    }
+
+    @Override
+    protected void onInterrupted() {
+        this.setState(State.DISCONNECTED);
+    }
+
+    private void addMessage(Message message) {
+        clientInfo.addMessage(new Message(message.getSender(), message.getReceiver(), Message.MessageType.MESSAGE,
+                message.getPayload()));
+    }
+
+    private void addInfo(Message message) {
+        clientInfo.addMessage(new Message(null, null, Message.MessageType.INFO, message.getPayload()));
+    }
+
+    private void addError(Message message) {
+        clientInfo.addMessage(new Message(null, null, Message.MessageType.ERROR, message.getPayload()));
+    }
 }
