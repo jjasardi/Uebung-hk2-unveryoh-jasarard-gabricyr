@@ -25,7 +25,8 @@ public class ClientInfo {
     private final BooleanProperty isConnected = new SimpleBooleanProperty();
 
     /**
-     * This constructor creates a new {@link ClientInfo} object.
+     * This constructor creates a new {@link ClientInfo} object with default values for the property fields.
+     * It also creates a messageList as an observable list
      */
     public ClientInfo() {
         serverAddress.set(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
@@ -95,7 +96,7 @@ public class ClientInfo {
     }
 
     /**
-     * his method returns the isConnected property.
+     * This method returns the isConnected property.
      *
      * @return  isConnected.
      */
@@ -115,7 +116,7 @@ public class ClientInfo {
     /**
      * This method adds a message to the messageList.
      *
-     * @param message   {@link Message} field to be added.
+     * @param message   {@link Message} object to be added.
      */
     public void addMessage(Message message) {
         messageList.add(message);

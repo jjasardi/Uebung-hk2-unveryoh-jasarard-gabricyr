@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
 /**
- * This class is a controller. It manages the communication between view and model.
+ * This class is a controller for the ChatWindow. It manages the communication between view and model and defines
+ * the behaviour of the GUI for user interaction.
  */
 public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
@@ -46,7 +47,7 @@ public class ChatWindowController {
 
 
     /**
-     * This method binds the fields from the {@link ClientUI} with the {@link ClientInfo} properties.
+     * This method binds the controls from the {@link ClientUI} with the {@link ClientInfo} properties.
      */
     @FXML
     public void initialize() {
@@ -159,10 +160,7 @@ public class ChatWindowController {
         }
     }
 
-    /**
-     * This method clears the message area.
-     */
-    public void clearMessageArea() {
+    private void clearMessageArea() {
         this.messageArea.clear();
     }
 

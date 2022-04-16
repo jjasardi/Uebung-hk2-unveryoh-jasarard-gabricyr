@@ -21,7 +21,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
      *
      * @param connection    the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}
      *                      which will be given to the superclass constructor.
-     * @param clientInfo    {@link ClientInfo} field.
+     * @param clientInfo    {@link ClientInfo} object.
      */
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
                                    ClientInfo clientInfo)  {
@@ -35,6 +35,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
 
     public void setState (State newState) {
         this.state = newState;
+        // TODO move this code in a new Method in ClientInfo
         if (newState == State.CONNECTED) {
             clientInfo.setIsConnected(true);
         } else if (newState == State.DISCONNECTED) {
@@ -74,7 +75,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
     /**
      * This method sends a message to the receiver.
      *
-     * @param receiver --> wird sowieso angepasst beim refactoring (Message message)
+     * @param receiver --> wird sowieso angepasst beim refactoring (Message message) // TODO modify this methods javadoc
      * @param message  --> wird sowieso angepasst beim refactoring (Message message)
      * @throws ChatProtocolException    exception if the {@link State} is not {@link State#CONNECTED}.
      */
