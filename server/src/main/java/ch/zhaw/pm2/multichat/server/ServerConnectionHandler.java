@@ -16,7 +16,7 @@ import static ch.zhaw.pm2.multichat.protocol.Config.State;
 public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
     private static final AtomicInteger CONNECTION_COUNTER= new AtomicInteger(1);
-    private static int CONNECTION_ID = CONNECTION_COUNTER.get();
+    private static int connectionID = CONNECTION_COUNTER.get();
     private State state = State.NEW;
 
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
@@ -30,9 +30,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
 
     private void checkIfUserNameIsSet() {
         if (Config.USER_NONE.equals(userName)) {
-            this.userName = "Anonymous-" + CONNECTION_ID;
-        } else {
-            this.userName = getUserName();
+            this.userName = "Anonymous-" + connectionID;
         }
     }
 
@@ -43,7 +41,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         if (message.getReceiver() == null || message.getSender().isBlank()) {
             message.setSender(this.userName);
-            CONNECTION_ID = CONNECTION_COUNTER.incrementAndGet();
+            connectionID = CONNECTION_COUNTER.incrementAndGet();
         }
         if (connectionRegistry.containsKey(message.getSender())) {
             throw new ChatProtocolException("User name already taken: " + message.getSender());
