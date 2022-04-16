@@ -30,7 +30,7 @@ import static ch.zhaw.pm2.multichat.protocol.Config.State;
  * the behaviour of the GUI for user interaction.
  */
 public class ChatWindowController {
-    private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private static final Pattern MESSAGE_PATTERN = Pattern.compile("^(?:@(\\S*))?(\\s*)(.*)$");
     private static final String NO_WHITE_SPACES_REGEX = "^(\\S*)?";
     private static final String ANONYMOUS_USERNAME_REGEX = "^(Anonymous-([0-9]+))+";
     private ClientInfo clientInfo;
@@ -38,16 +38,24 @@ public class ChatWindowController {
 
     private final WindowCloseHandler windowCloseHandler = new WindowCloseHandler();
 
-    @FXML private Pane rootPane;
-    @FXML private TextField serverAddressField;
-    @FXML private TextField serverPortField;
-    @FXML private TextField userNameField;
-    @FXML private TextField messageField;
-    @FXML private TextArea messageArea;
-    @FXML private Button connectButton;
-    @FXML private Button sendButton;
-    @FXML private TextField filterValue;
-
+    @FXML
+    private Pane rootPane;
+    @FXML
+    private TextField serverAddressField;
+    @FXML
+    private TextField serverPortField;
+    @FXML
+    private TextField userNameField;
+    @FXML
+    private TextField messageField;
+    @FXML
+    private TextArea messageArea;
+    @FXML
+    private Button connectButton;
+    @FXML
+    private Button sendButton;
+    @FXML
+    private TextField filterValue;
 
     /**
      * This method binds the controls from the {@link ClientUI} with the {@link ClientInfo} properties.
@@ -84,9 +92,8 @@ public class ChatWindowController {
         }
     }
 
-
-    private boolean checkIfNoWhitespace(){
-        if(userNameField.getText().matches(NO_WHITE_SPACES_REGEX)) {
+    private boolean checkIfNoWhitespace() {
+        if (userNameField.getText().matches(NO_WHITE_SPACES_REGEX)) {
             return true;
         } else {
             writeError("Invalid username!");
@@ -95,8 +102,8 @@ public class ChatWindowController {
         }
     }
 
-    private boolean checkIfNotAnonymous(){
-        if(userNameField.getText().matches(ANONYMOUS_USERNAME_REGEX)) {
+    private boolean checkIfNotAnonymous() {
+        if (userNameField.getText().matches(ANONYMOUS_USERNAME_REGEX)) {
             writeError("Invalid username!");
             writeInfo("Username can not be 'Anonymous-N'");
             return false;
@@ -109,7 +116,7 @@ public class ChatWindowController {
 
             startConnectionHandler();
             connectionHandler.connect();
-        } catch(ChatProtocolException | IOException e) {
+        } catch (ChatProtocolException | IOException e) {
             writeError(e.getMessage());
         }
     }
@@ -137,7 +144,8 @@ public class ChatWindowController {
         if (matcher.find()) {
             String receiver = matcher.group(1);
             String message = matcher.group(3);
-            if (receiver == null || receiver.isBlank()) receiver = Config.USER_ALL;
+            if (receiver == null || receiver.isBlank())
+                receiver = Config.USER_ALL;
             try {
                 connectionHandler.message(receiver, message);
                 messageField.clear();
@@ -150,8 +158,8 @@ public class ChatWindowController {
     }
 
     @FXML
-    private void applyFilter( ) {
-    	this.redrawMessageList();
+    private void applyFilter() {
+        this.redrawMessageList();
     }
 
     private void startConnectionHandler() throws IOException {
@@ -159,8 +167,8 @@ public class ChatWindowController {
         String serverAddress = serverAddressField.getText();
         int serverPort = Integer.parseInt(serverPortField.getText());
         connectionHandler = new ClientConnectionHandler(
-            NetworkHandler.openConnection(serverAddress, serverPort),
-            clientInfo);
+                NetworkHandler.openConnection(serverAddress, serverPort),
+                clientInfo);
         new Thread(connectionHandler).start();
 
         rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
@@ -210,28 +218,26 @@ public class ChatWindowController {
     }
 
     private void writeFilteredMessages(String filter) {
-		boolean showAll = filter == null || filter.isBlank();
+        boolean showAll = filter == null || filter.isBlank();
         List<Message> messageList = clientInfo.messageListProperty();
-		clearMessageArea();
+        clearMessageArea();
         for (Message message : messageList) {
-            String sender = Objects.requireNonNullElse(message.getSender(),"");
-		    String receiver = Objects.requireNonNullElse(message.getReceiver(),"");
-		    String text = Objects.requireNonNull(message.getPayload(), "");
-			if(showAll ||
-					sender.contains(filter) ||
-					receiver.contains(filter) ||
-					text.contains(filter))
-			{
+            String sender = Objects.requireNonNullElse(message.getSender(), "");
+            String receiver = Objects.requireNonNullElse(message.getReceiver(), "");
+            String text = Objects.requireNonNull(message.getPayload(), "");
+            if (showAll ||
+                    sender.contains(filter) ||
+                    receiver.contains(filter) ||
+                    text.contains(filter)) {
                 switch (message.getType()) {
                     case MESSAGE -> writeMessage(message.getSender(), message.getReceiver(), message.getPayload());
                     case ERROR -> writeError(message.getPayload());
                     case INFO -> writeInfo(message.getPayload());
                     default -> writeError("Unexpected message type: " + message.getType());
                 }
-			}
+            }
         }
-	}
-
+    }
 
     /**
      * This class handles the closing of the {@link ClientUI}.

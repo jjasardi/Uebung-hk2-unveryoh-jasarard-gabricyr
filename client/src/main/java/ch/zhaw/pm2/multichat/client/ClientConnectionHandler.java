@@ -24,7 +24,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
      * @param clientInfo    {@link ClientInfo} object.
      */
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
-                                   ClientInfo clientInfo)  {
+            ClientInfo clientInfo) {
         super(connection);
         this.clientInfo = clientInfo;
         setUserName(clientInfo.getUserName());
@@ -34,7 +34,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
         return this.state;
     }
 
-    public void setState (State newState) {
+    public void setState(State newState) {
         this.state = newState;
         clientInfo.updateIsConnectedProperty(newState);
     }
@@ -46,7 +46,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
      * @throws ChatProtocolException   exception if the {@link State} is not {@link State#NEW}.
      */
     public void connect() throws ChatProtocolException {
-        if (state != State.NEW) throw new ChatProtocolException("Illegal state for connect: " + state);
+        if (state != State.NEW)
+            throw new ChatProtocolException("Illegal state for connect: " + state);
         this.sendData(new Message(clientInfo.getUserName(), Config.USER_NONE, MessageType.CONNECT, null));
         this.setState(State.CONFIRM_CONNECT);
     }
@@ -58,7 +59,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
      * @throws ChatProtocolException   exception if the {@link State} is not {@link State#NEW} and not {@link State#CONNECTED}.
      */
     public void disconnect() throws ChatProtocolException {
-        if (state != State.NEW && state != State.CONNECTED) throw new ChatProtocolException("Illegal state for disconnect: " + state);
+        if (state != State.NEW && state != State.CONNECTED)
+            throw new ChatProtocolException("Illegal state for disconnect: " + state);
         this.sendData(new Message(clientInfo.getUserName(), Config.USER_NONE, MessageType.DISCONNECT, null));
         this.setState(State.CONFIRM_DISCONNECT);
     }
@@ -71,7 +73,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
      * @throws ChatProtocolException    exception if the {@link State} is not {@link State#CONNECTED}.
      */
     public void message(String receiver, String message) throws ChatProtocolException {
-        if (state != State.CONNECTED) throw new ChatProtocolException("Illegal state for message: " + state);
+        if (state != State.CONNECTED)
+            throw new ChatProtocolException("Illegal state for message: " + state);
         this.sendData(new Message(clientInfo.getUserName(), receiver, MessageType.MESSAGE, message));
     }
 
@@ -119,7 +122,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
             return;
         }
         addMessage(message);
-        System.out.println("MESSAGE: From " + message.getSender() + " to " + message.getReceiver() + ": "+  message.getPayload());
+        System.out.println(
+                "MESSAGE: From " + message.getSender() + " to " + message.getReceiver() + ": " + message.getPayload());
     }
 
     @Override
@@ -134,7 +138,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
     }
 
     private void addMessage(Message message) {
-        clientInfo.addMessage(new Message(message.getSender(), message.getReceiver(), Message.MessageType.MESSAGE, message.getPayload()));
+        clientInfo.addMessage(new Message(message.getSender(), message.getReceiver(), Message.MessageType.MESSAGE,
+                message.getPayload()));
     }
 
     private void addInfo(Message message) {

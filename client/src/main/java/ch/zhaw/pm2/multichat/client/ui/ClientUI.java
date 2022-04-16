@@ -20,15 +20,15 @@ public class ClientUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
             Pane rootPane = loader.load();
-            
+
             Scene scene = new Scene(rootPane);
-            
+
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(420);
             primaryStage.setMinHeight(250);
             primaryStage.setTitle("Multichat Client");
             primaryStage.show();
-        } catch(Exception e) {
+        } catch (Exception e) {
             System.err.println("Error starting up UI" + e.getMessage());
         }
     }

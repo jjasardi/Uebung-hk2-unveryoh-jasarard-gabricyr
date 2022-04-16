@@ -38,7 +38,7 @@ public abstract class ConnectionHandler implements Runnable {
     }
 
     @Override
-    public void run () {
+    public void run() {
         startReceiving();
     }
 
@@ -62,9 +62,9 @@ public abstract class ConnectionHandler implements Runnable {
             System.out.println("Connection terminated by remote");
             onInterrupted();
             System.out.println("Unregistered because client connection terminated: " + userName + " " + e.getMessage());
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.err.println("Communication error: " + e);
-        } catch(ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             System.err.println("Received object of unknown type: " + e.getMessage());
         }
         System.out.println("Stopping Connection Handler for " + userName);
@@ -132,7 +132,6 @@ public abstract class ConnectionHandler implements Runnable {
      */
     protected abstract void handleDisconnect(Message message) throws ChatProtocolException;
 
-
     /**
      * This abstract method is called when the {@link MessageType} is {@link MessageType#MESSAGE}. <br>
      * It handles it differently depending on the subclass.
@@ -141,7 +140,6 @@ public abstract class ConnectionHandler implements Runnable {
      * @throws ChatProtocolException   if an exception occures in the chat protocol, it will be thrown.
      */
     protected abstract void handleMessage(Message message) throws ChatProtocolException;
-
 
     /**
      * This abstract method is called when the {@link MessageType} is {@link MessageType#ERROR}. <br>
@@ -157,7 +155,6 @@ public abstract class ConnectionHandler implements Runnable {
      */
     protected abstract void onInterrupted();
 
-
     /**
      * This method sends the {@link Message} object over the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}.
      *
@@ -171,7 +168,7 @@ public abstract class ConnectionHandler implements Runnable {
                 System.err.println("Connection closed: " + e.getMessage());
             } catch (EOFException e) {
                 System.out.println("Connection terminated by remote");
-            } catch(IOException e) {
+            } catch (IOException e) {
                 System.err.println("Communication error: " + e.getMessage());
             }
         }

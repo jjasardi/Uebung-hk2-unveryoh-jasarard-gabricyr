@@ -13,4 +13,3 @@ public class Client {
         System.out.println("Client Application ended");
     }
 }
-
