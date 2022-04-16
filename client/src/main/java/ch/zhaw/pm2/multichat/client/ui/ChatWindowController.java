@@ -163,7 +163,6 @@ public class ChatWindowController {
             clientInfo);
         new Thread(connectionHandler).start();
 
-        // register window close handler
         rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
     }
 
@@ -183,7 +182,6 @@ public class ChatWindowController {
     }
 
     private void terminateConnectionHandler() {
-        // unregister window close handler
         rootPane.getScene().getWindow().removeEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, windowCloseHandler);
         if (connectionHandler != null) {
             connectionHandler.stopReceiving();
