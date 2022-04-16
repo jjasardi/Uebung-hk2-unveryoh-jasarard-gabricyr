@@ -10,7 +10,7 @@ Focus was to build in concurrency functionality and the MVC Pattern and also to 
 ## Authors
 We are a small team of Computer Science students from the Zurich University of Applied Sciences.
 
-- [@unverjoh](https://github.zhaw.ch/unveryoh)
+- [@unveryoh](https://github.zhaw.ch/unveryoh)
 - [@jasarard](https://github.zhaw.ch/jasarard)
 - [@gabricyr](https://github.zhaw.ch/gabricyr)
 
@@ -88,6 +88,8 @@ The sent messages should also appear in the conversation history to complete the
 ##### Implementation 4:
 
 An implementation could be that the server gets started automaticlly if the first clients wants to connect to a server.
-A friend of him could then connect to the running server by entering the host name. Now you can connect onl to de default server. 
+A friend of him could then connect to the running server by entering the host name.
+
+
 ## Bugs
 All known and not implemented bugs are listed as [open issues](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/issues). 
