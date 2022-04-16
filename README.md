@@ -24,7 +24,7 @@ To start the project you have to manually start each client (with gradle run cla
 Then make gradle run for the [Server](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/blob/main/server/src/main/java/ch/zhaw/pm2/multichat/server/Server.java) only once even for multiple clients!
 ## Documentation of the refactoring process
 The given code was very unstructured and far away from the clean code ideas.
-The functionality was mostly given. The only thing was that not more then one client could connect to the server which resulted in the fact that a dialog via the chat window was impossible. 
+The functionality was mostly given. The only thing was that not more than one client could connect to the server which resulted in the fact that a dialog via the chat window was impossible. 
 
 ### Approach
 
