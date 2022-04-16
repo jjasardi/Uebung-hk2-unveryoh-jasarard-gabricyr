@@ -6,6 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+/**
+ * This class extends {@link Application} and links the ChatWindow.fxml file.
+ */
 public class ClientUI extends Application {
 
     @Override

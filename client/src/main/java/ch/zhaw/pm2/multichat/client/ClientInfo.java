@@ -12,6 +12,9 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+/**
+ * This class contains all the informations about the {@link ch.zhaw.pm2.multichat.client.ui.Client}.
+ */
 public class ClientInfo {
     private final ListProperty<Message> messageList;
     private final StringProperty userName = new SimpleStringProperty();
@@ -19,6 +22,10 @@ public class ClientInfo {
     private final StringProperty serverAddress = new SimpleStringProperty();
     private final BooleanProperty isConnected = new SimpleBooleanProperty();
 
+    /**
+     * This constructor creates a new {@link ClientInfo} object with default values for the property fields.
+     * It also creates a messageList as an observable list
+     */
     public ClientInfo() {
         serverAddress.set(NetworkHandler.DEFAULT_ADDRESS.getCanonicalHostName());
         serverPort.set(String.valueOf(NetworkHandler.DEFAULT_PORT));
@@ -61,26 +68,54 @@ public class ClientInfo {
         this.isConnected.set(isConnected);
     }
 
+    /**
+     * This method returns the username as a StringProperty.
+     * @return  userName
+     */
     public StringProperty userNameProperty() {
         return userName;
     }
 
+    /**
+     * This method return the server port as a StringProperty.
+     * @return  serverPort
+     */
     public StringProperty serverPortProperty() {
         return serverPort;
     }
 
+    /**
+     * This method returns the serverAddress property.
+     *
+     * @return serverAddress.
+     */
     public StringProperty serverAddressProperty() {
         return serverAddress;
     }
 
+    /**
+     * This method returns the isConnected property.
+     *
+     * @return  isConnected.
+     */
     public BooleanProperty isConnectedProperty() {
         return isConnected;
     }
 
+    /**
+     * This method returns the messageList property.
+     *
+     * @return  messageList.
+     */
     public final ListProperty<Message> messageListProperty() {
         return messageList;
     }
 
+    /**
+     * This method adds a message to the messageList.
+     *
+     * @param message   {@link Message} object to be added.
+     */
     public void addMessage(Message message) {
         messageList.add(message);
     }
