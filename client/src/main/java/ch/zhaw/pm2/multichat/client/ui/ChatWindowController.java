@@ -7,7 +7,7 @@ import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -58,6 +58,7 @@ public class ChatWindowController {
         userNameField.textProperty().bindBidirectional(clientInfo.userNameProperty());
         serverPortField.textProperty().bindBidirectional(clientInfo.serverPortProperty());
         serverAddressField.textProperty().bindBidirectional(clientInfo.serverAddressProperty());
+        connectButton.disableProperty().bind(Bindings.isEmpty(serverPortField.textProperty()));
         clientInfo.isConnectedProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> connectButton.setText((newValue) ? "Disconnect" : "Connect"));
             connectionStateChanged(newValue);
