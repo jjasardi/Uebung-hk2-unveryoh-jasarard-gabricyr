@@ -66,8 +66,8 @@ public class ClientConnectionHandler extends ConnectionHandler {
     /**
      * This method sends a message to the receiver.
      *
-     * @param receiver --> wird sowieso angepasst beim refactoring (Message message) // TODO modify this methods javadoc
-     * @param message  --> wird sowieso angepasst beim refactoring (Message message)
+     * @param receiver receiver
+     * @param message  message content
      * @throws ChatProtocolException    exception if the {@link State} is not {@link State#CONNECTED}.
      */
     public void message(String receiver, String message) throws ChatProtocolException {
