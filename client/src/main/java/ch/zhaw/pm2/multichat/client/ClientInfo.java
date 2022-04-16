@@ -3,6 +3,7 @@ package ch.zhaw.pm2.multichat.client;
 import ch.zhaw.pm2.multichat.protocol.Config;
 import ch.zhaw.pm2.multichat.protocol.Message;
 import ch.zhaw.pm2.multichat.protocol.NetworkHandler;
+import ch.zhaw.pm2.multichat.protocol.Config.State;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -40,18 +41,6 @@ public class ClientInfo {
         return userName.get();
     }
 
-    public final String getServerPort() {
-        return serverPort.get();
-    }
-
-    public final String getServerAddress() {
-        return serverAddress.get();
-    }
-
-    public final boolean getIsConnected() {
-        return isConnected.get();
-    }
-
     public final void setUserName(String userName) {
         this.userName.set(userName);
     }
@@ -62,10 +51,6 @@ public class ClientInfo {
 
     public final void setServerAddress(String serverAddress) {
         this.serverAddress.set(serverAddress);
-    }
-
-    public final void setIsConnected(boolean isConnected) {
-        this.isConnected.set(isConnected);
     }
 
     /**
@@ -118,5 +103,18 @@ public class ClientInfo {
      */
     public void addMessage(Message message) {
         messageList.add(message);
+    }
+
+    /**
+     * This method updates the isConnectedProperty based on the {@link State} parameter.
+     *
+     * @param newState   {@link State} new State of the client.
+     */
+    public void updateIsConnectedProperty(State newState) {
+        if (newState == State.CONNECTED) {
+            this.isConnected.set(true);
+        } else if (newState == State.DISCONNECTED) {
+            this.isConnected.set(false);
+        }
     }
 }

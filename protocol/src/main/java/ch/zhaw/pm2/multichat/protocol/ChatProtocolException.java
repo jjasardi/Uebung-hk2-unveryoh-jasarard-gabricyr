@@ -16,12 +16,4 @@ public class ChatProtocolException extends Exception {
         super(message);
     }
 
-    public ChatProtocolException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ChatProtocolException(Throwable cause) {
-        super(cause);
-    }
-
 }

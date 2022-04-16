@@ -1,17 +1,18 @@
 package ch.zhaw.pm2.multichat.protocol;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * This class implements {@link Serializable} and represents the data object which is sent.
  */
 public class Message implements Serializable {
-    private static final long serialVersionUID = -7581180395641596879L;
-
-    private final MessageType type;
+    @Serial
+    private static final long serialVersionUID = -663906070220319087L;
     private String sender;
     private final String receiver;
-    private final String text;
+    private final MessageType type;
+    private final String payload;
 
     /**
      * This constructor creates a {@link Message} obejct.
@@ -19,13 +20,13 @@ public class Message implements Serializable {
      * @param type      represents the {@link MessageType}.
      * @param sender    represents the sender of the message.
      * @param receiver  represents the receiver of the message.
-     * @param text      represents the text of the message.
+     * @param payload   represents the text of the message.
      */
-    public Message(MessageType type, String sender, String receiver, String text) {
-        this.type = type;
+    public Message(String sender, String receiver, MessageType type, String payload) {
         this.sender = sender;
         this.receiver = receiver;
-        this.text = text;
+        this.type = type;
+        this.payload = payload;
     }
 
     public MessageType getType() {
@@ -40,8 +41,8 @@ public class Message implements Serializable {
         return receiver;
     }
 
-    public String getText() {
-        return text;
+    public String getPayload() {
+        return payload;
     }
 
     public void setSender(String sender) {

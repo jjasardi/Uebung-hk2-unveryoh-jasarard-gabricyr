@@ -8,21 +8,17 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * This class represents the multichat {@link Server} and contains the main method. <br>
  * It also contains the thread for the {@link Server} object.
  */
 public class Server {
 
-    // Server connection
     private NetworkHandler.NetworkServer<Message> networkServer;
 
-    // Connection registry
-    private Map<String,ServerConnectionHandler> connections = new HashMap<>();
+    private Map<String, ServerConnectionHandler> connections = new HashMap<>();
 
     public static void main(String[] args) {
-        // Parse arguments for server port.
         try {
             int port;
             switch (args.length) {
@@ -33,7 +29,7 @@ public class Server {
                     return;
                 }
             }
-            // Initialize server
+
             final Server server = new Server(port);
 
             // This adds a shutdown hook running a cleanup task if the JVM is terminated (kill -HUP, Ctrl-C,...)
@@ -52,7 +48,6 @@ public class Server {
                 }
             });
 
-            // Start server
             server.start();
         } catch (IOException e) {
             System.err.println("Error while starting server." + e.getMessage());
@@ -66,7 +61,6 @@ public class Server {
      * @throws IOException  exception if an error occures while creating the {@link Server} the new port.
      */
     public Server(int serverPort) throws IOException {
-        // Open server connection
         System.out.println("Create server connection");
         networkServer = NetworkHandler.createServer(serverPort);
         System.out.println("Listening on " + networkServer.getHostAddress() + ":" + networkServer.getHostPort());
@@ -76,25 +70,21 @@ public class Server {
         System.out.println("Server started.");
         try {
             while (!networkServer.isClosed()) {
-                 NetworkHandler.NetworkConnection<Message> connection = networkServer.waitForConnection();
+                NetworkHandler.NetworkConnection<Message> connection = networkServer.waitForConnection();
 
-                 Runnable connectionHandler = new ServerConnectionHandler(connection, connections);
-                 Thread connectionHandlerThread = new Thread(connectionHandler);
-                 connectionHandlerThread.start();
+                Runnable connectionHandler = new ServerConnectionHandler(connection, connections);
+                Thread connectionHandlerThread = new Thread(connectionHandler);
+                connectionHandlerThread.start();
 
-                 System.out.println(String.format("Connected new Client %s with IP:Port <%s:%d>",
-                     ((ServerConnectionHandler) connectionHandler).getUserName(),
-                     connection.getRemoteHost(),
-                     connection.getRemotePort()
-                 ));
+                System.out.println(String.format("Connected with IP:Port <%s:%d>",
+                        (connection.getRemoteHost()),
+                        connection.getRemotePort()));
             }
-        } catch(SocketException e) {
+        } catch (SocketException e) {
             System.out.println("Server connection terminated");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Communication error " + e);
         }
-        // close server
         System.out.println("Server Stopped.");
     }
 
