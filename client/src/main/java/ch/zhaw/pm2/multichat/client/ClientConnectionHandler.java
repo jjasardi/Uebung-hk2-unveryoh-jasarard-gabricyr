@@ -20,7 +20,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
      * This constructor creates a new {@link ClientConnectionHandler} object.
      *
      * @param connection    the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}
-     *                      which will be given to the superclass constructer.
+     *                      which will be given to the superclass constructor.
      * @param clientInfo    {@link ClientInfo} field.
      */
     public ClientConnectionHandler(NetworkHandler.NetworkConnection<Message> connection,
@@ -42,6 +42,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
         }
     }
 
+    @Override
     public void run () {
         startReceiving();
     }

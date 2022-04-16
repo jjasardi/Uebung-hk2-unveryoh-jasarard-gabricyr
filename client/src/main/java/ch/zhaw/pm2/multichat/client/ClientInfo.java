@@ -69,10 +69,18 @@ public class ClientInfo {
         this.isConnected.set(isConnected);
     }
 
+    /**
+     * This method returns the username as a StringProperty.
+     * @return  userName
+     */
     public StringProperty userNameProperty() {
         return userName;
     }
 
+    /**
+     * This method return the server port as a IntegerProperty.
+     * @return  serverPort
+     */
     public IntegerProperty serverPortProperty() {
         return serverPort;
     }
