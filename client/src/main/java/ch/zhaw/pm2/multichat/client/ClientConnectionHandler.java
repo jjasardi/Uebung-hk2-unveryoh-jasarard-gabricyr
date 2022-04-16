@@ -36,17 +36,7 @@ public class ClientConnectionHandler extends ConnectionHandler {
 
     public void setState (State newState) {
         this.state = newState;
-        // TODO move this code in a new Method in ClientInfo
-        if (newState == State.CONNECTED) {
-            clientInfo.setIsConnected(true);
-        } else if (newState == State.DISCONNECTED) {
-            clientInfo.setIsConnected(false);
-        }
-    }
-
-    @Override
-    public void run () {
-        startReceiving();
+        clientInfo.updateIsConnectedProperty(newState);
     }
 
     /**

@@ -37,6 +37,11 @@ public abstract class ConnectionHandler implements Runnable {
         return this.connection;
     }
 
+    @Override
+    public void run () {
+        startReceiving();
+    }
+
     /**
      * This method receives the messages. Different actions are executed depending on the exceptions catched.
      */

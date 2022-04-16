@@ -22,8 +22,7 @@ public class ClientUI extends Application {
             Pane rootPane = loader.load();
             // fill in scene and stage setup
             Scene scene = new Scene(rootPane);
-            //scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-
+            
             // configure and show stage
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(420);

@@ -124,9 +124,4 @@ public class ServerConnectionHandler extends ConnectionHandler {
     protected void onInterrupted() {
         connectionRegistry.remove(getUserName());
     }
-
-    @Override
-    public void run() {
-        startReceiving();
-    }
 }

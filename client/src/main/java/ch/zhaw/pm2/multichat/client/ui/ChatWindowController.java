@@ -31,6 +31,8 @@ import static ch.zhaw.pm2.multichat.protocol.Config.State;
  */
 public class ChatWindowController {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile( "^(?:@(\\S*))?(\\s*)(.*)$" );
+    private static final String NO_WHITE_SPACES_REGEX = "^(\\S*)?";
+    private static final String ANONYMOUS_USERNAME_REGEX = "^(Anonymous-([0-9]+))+";
     private ClientInfo clientInfo;
     private ClientConnectionHandler connectionHandler;
 
@@ -71,10 +73,6 @@ public class ChatWindowController {
         });
     }
 
-    private void applicationClose() {
-        connectionHandler.setState(State.DISCONNECTED);
-    }
-
     @FXML
     private void toggleConnection() {
         if (connectionHandler == null || connectionHandler.getState() != State.CONNECTED) {
@@ -88,7 +86,7 @@ public class ChatWindowController {
 
 
     private boolean checkIfNoWhitespace(){
-        if(userNameField.getText().matches("^(\\S*)?")) {
+        if(userNameField.getText().matches(NO_WHITE_SPACES_REGEX)) {
             return true;
         } else {
             writeError("Invalid username!");
@@ -98,7 +96,7 @@ public class ChatWindowController {
     }
 
     private boolean checkIfNotAnonymous(){
-        if(userNameField.getText().matches("^(Anonymous-([0-9]+))+")) {
+        if(userNameField.getText().matches(ANONYMOUS_USERNAME_REGEX)) {
             writeError("Invalid username!");
             writeInfo("Username can not be 'Anonymous-N'");
             return false;
@@ -246,5 +244,8 @@ public class ChatWindowController {
             applicationClose();
         }
 
+        private void applicationClose() {
+            connectionHandler.setState(State.DISCONNECTED);
+        }
     }
 }
