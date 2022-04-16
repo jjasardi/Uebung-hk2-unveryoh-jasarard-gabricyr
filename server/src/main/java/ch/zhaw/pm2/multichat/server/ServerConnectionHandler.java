@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
+import static ch.zhaw.pm2.multichat.protocol.Config.USER_NONE;
 
 /**
  * This class manages the connection and the communication with the client. <br>
@@ -33,13 +34,13 @@ public class ServerConnectionHandler extends ConnectionHandler {
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         super(connection);
-        checkIfUserNameIsSet();
+        setDefaultUsername();
         Objects.requireNonNull(connection, "Connection must not be null");
         Objects.requireNonNull(registry, "Registry must not be null");
         this.connectionRegistry = registry;
     }
 
-    private void checkIfUserNameIsSet() {
+    private void setDefaultUsername() {
         if (Config.USER_NONE.equals(userName)) {
             this.userName = "Anonymous-" + connectionID;
         }
@@ -50,17 +51,31 @@ public class ServerConnectionHandler extends ConnectionHandler {
         if (this.state != State.NEW) {
             throw new ChatProtocolException("Illegal state for connect request: " + state);
         }
+        handleAnonymousClient(message);
+        handleExistingUser(message);
+        handleCustomClient(message);
+        connectionRegistry.put(userName, this);
+        sendData(new Message(Config.USER_NONE, userName, MessageType.CONFIRM, "Registration successfull for " + userName));
+        this.state = State.CONNECTED;
+    }
+
+    private void handleAnonymousClient(Message message) {
         if (message.getReceiver() == null || message.getSender().isBlank()) {
             message.setSender(this.userName);
             connectionID = CONNECTION_COUNTER.incrementAndGet();
         }
+    }
+
+    private void handleExistingUser(Message message) throws ChatProtocolException {
         if (connectionRegistry.containsKey(message.getSender())) {
             throw new ChatProtocolException("User name already taken: " + message.getSender());
         }
-        this.userName = message.getSender();
-        connectionRegistry.put(userName, this);
-        sendData(new Message(Config.USER_NONE, userName, MessageType.CONFIRM, "Registration successfull for " + userName));
-        this.state = State.CONNECTED;
+    }
+
+    private void handleCustomClient(Message message) {
+        if(userName != USER_NONE) {
+            this.userName = message.getSender();
+        }
     }
 
     @Override
