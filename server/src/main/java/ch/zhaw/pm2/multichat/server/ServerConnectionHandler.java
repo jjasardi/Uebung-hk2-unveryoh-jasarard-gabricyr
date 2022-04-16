@@ -13,12 +13,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.zhaw.pm2.multichat.protocol.Config.State;
 
+/**
+ * This class manages the connection and the communication with the client. <br>
+ * It also executes different actions depending on the type of the message received.
+ */
 public class ServerConnectionHandler extends ConnectionHandler {
     private final Map<String,ServerConnectionHandler> connectionRegistry;
     private static final AtomicInteger connectionCounter = new AtomicInteger(0);
     private final int connectionId = connectionCounter.incrementAndGet();
     private State state = State.NEW;
 
+    /**
+     * This constructor creates a new {@link ServerConnectionHandler} object.
+     *
+     * @param connection   the {@link ch.zhaw.pm2.multichat.protocol.NetworkHandler.NetworkConnection}
+     *                     which will be given to the superclass constructer.
+     * @param registry     containing all the connections the server holds.
+     */
     public ServerConnectionHandler (NetworkHandler.NetworkConnection<Message> connection,
                                    Map<String,ServerConnectionHandler> registry) {
         super(connection);
