@@ -31,7 +31,6 @@ public class ServerConnectionHandler extends ConnectionHandler {
     private void checkIfUserNameIsSet() {
         if (Config.USER_NONE.equals(userName)) {
             this.userName = "Anonymous-" + CONNECTION_ID;
-            CONNECTION_ID = CONNECTION_COUNTER.incrementAndGet();
         } else {
             this.userName = getUserName();
         }
@@ -44,6 +43,7 @@ public class ServerConnectionHandler extends ConnectionHandler {
         }
         if (message.getReceiver() == null || message.getSender().isBlank()) {
             message.setSender(this.userName);
+            CONNECTION_ID = CONNECTION_COUNTER.incrementAndGet();
         }
         if (connectionRegistry.containsKey(message.getSender())) {
             throw new ChatProtocolException("User name already taken: " + message.getSender());
