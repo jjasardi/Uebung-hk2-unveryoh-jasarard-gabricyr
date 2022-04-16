@@ -66,6 +66,8 @@ The same approach is reached with the fix of the MVC Pattern due to the implemen
 
 #### Future Implementations:
 
+__All future implementations are listed as open [issues](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/issues).__
+
 ##### Implementation 1:
 In this [issue](https://github.zhaw.ch/PM2-IT21aWIN-fame-rayi-wahl/Uebung-hk2-unveryoh-jasarard-gabricyr/issues/13) we described the problem that you must know the username of the client you want to send a direct message to.
 In a further refactoring process we could implement the output of all current registred clients. Or even a search function wich the real name which implies then that the client must registrate himself. 
