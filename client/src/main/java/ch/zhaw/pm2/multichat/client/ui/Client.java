@@ -7,6 +7,9 @@ import javafx.application.Application;
  */
 public class Client {
 
+    /**
+     * This main method launches the client side of the application.
+     */
     public static void main(String[] args) {
         System.out.println("Starting Client Application");
         Application.launch(ClientUI.class, args);
